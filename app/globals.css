@@ -1,0 +1,129 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  /* Fonts */
+  --font-sans: var(--font-dm-sans), 'DM Sans Fallback', sans-serif;
+  --font-mono: var(--font-dm-mono), 'DM Mono Fallback', monospace;
+  --font-syne: var(--font-syne), 'Syne Fallback', sans-serif;
+  --font-heading: var(--font-syne), 'Syne Fallback', sans-serif;
+
+  /* LOKA brand */
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-dark: var(--primary-dark);
+  --color-primary-light: var(--primary-light);
+
+  /* Surfaces */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface-1: var(--surface-1);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+
+  /* Text */
+  --color-muted-foreground: var(--muted-foreground);
+
+  /* Semantic */
+  --color-success: var(--success);
+  --color-error: var(--error);
+  --color-warning: var(--warning);
+
+  /* shadcn token mapping */
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+}
+
+:root {
+  /* LOKA — dark theme only */
+  --primary: #f59e0b;
+  --primary-foreground: #05080f;
+  --primary-dark: #d97706;
+  --primary-light: #fcd34d;
+
+  --background: #05080f;
+  --foreground: #e2eaf4;
+
+  --surface-1: #0d1424;
+  --surface-2: #111d30;
+  --surface-3: #1a2640;
+
+  --muted-foreground: #8090a8;
+
+  --success: #10b981;
+  --error: #ef4444;
+  --warning: #f59e0b;
+
+  --card: #0d1424;
+  --card-foreground: #e2eaf4;
+  --popover: #0d1424;
+  --popover-foreground: #e2eaf4;
+  --secondary: #111d30;
+  --secondary-foreground: #e2eaf4;
+  --muted: #111d30;
+  --accent: #1a2640;
+  --accent-foreground: #e2eaf4;
+  --destructive: #ef4444;
+  --border: #1a2640;
+  --input: #111d30;
+  --ring: #f59e0b;
+
+  --radius: 0.625rem;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+  /* Hide scrollbars for horizontal chip/category rows */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@keyframes loka-pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 16px rgba(16, 185, 129, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+.animate-pulse-ring {
+  animation: loka-pulse-ring 1.8s infinite;
+}
