@@ -1,3 +1,5 @@
+
+//lib/supabase/server.ts
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
@@ -26,3 +28,5 @@ export async function createClient() {
     }
   )
 }
+// Alias for Sprint 2+ compatibility
+export const createSupabaseServerClient = createClient

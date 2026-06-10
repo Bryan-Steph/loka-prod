@@ -94,7 +94,7 @@ function VendorDashboardContent() {
         >
           <Menu size={22} />
         </button>
-        <span className="font-syne text-[24px] font-extrabold text-primary">LOKA</span>
+        <span className="font-syne text-[24px] font-extrabold text-primary">Shopsy</span>
         <div className="flex items-center gap-1">
           <button
             className="flex h-10 w-10 items-center justify-center text-muted-foreground"
@@ -118,7 +118,7 @@ function VendorDashboardContent() {
           />
           <aside className="fixed inset-y-0 left-0 z-50 flex w-[280px] flex-col bg-surface-1 shadow-xl">
             <div className="flex h-14 items-center justify-between border-b border-surface-3 px-4">
-              <span className="font-syne text-[22px] font-extrabold text-primary">LOKA</span>
+              <span className="font-syne text-[22px] font-extrabold text-primary">Shopsy</span>
               <button onClick={() => setDrawer(false)} className="text-muted-foreground" aria-label="Close menu">
                 <X size={20} />
               </button>

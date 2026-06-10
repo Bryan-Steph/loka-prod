@@ -160,7 +160,7 @@ export default function AddProductPage() {
                   </>
                 ) : (
                   <ImageUpload
-                    folder="loka/products"
+                    folder="Shopsy/products"
                     onUpload={(u) => setPhotoAt(i, u)}
                     onError={setError}
                     className="h-full w-full"

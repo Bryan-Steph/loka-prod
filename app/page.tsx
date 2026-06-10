@@ -1,9 +1,11 @@
 'use client'
 
+
+//EDITED FOR SHOPSY - IGNORE
 import { useState } from 'react'
 import Link from 'next/link'
 import { MapPin, Bell, User, Search } from 'lucide-react'
-import { LOKAWordmark } from '@/components/ui/loka-wordmark'
+import { ShopsyWordmark } from '@/components/ui/Shopsy-wordmark'
 import { BottomNav } from '@/components/ui/bottom-nav'
 import { CategoryChip } from '@/components/product/category-chip'
 import { ProductCard } from '@/components/product/product-card'
@@ -30,7 +32,7 @@ export default function HomePage() {
       <header className="sticky top-0 z-30 border-b border-surface-3 bg-background/95 px-4 backdrop-blur">
         <div className="flex h-14 items-center justify-between">
           <span className="font-syne text-[26px] font-extrabold text-primary">
-            LOKA
+            Shopsy
           </span>
           <span className="flex items-center gap-1 rounded-full border border-surface-3 bg-surface-2 px-3 py-1.5 font-mono text-[11px] text-foreground">
             <MapPin size={12} className="text-primary" />
@@ -129,7 +131,7 @@ export default function HomePage() {
                   href="/register/vendor"
                   className="rounded-lg border border-surface-3 px-3 py-1.5 text-[12px] font-medium text-foreground"
                 >
-                  Sell with LOKA
+                  Sell with Shopsy
                 </Link>
               </div>
             </div>
@@ -170,16 +172,7 @@ export default function HomePage() {
         </section>
       </div>
 
-      {/* Dev: toggle loading */}
-      <button
-        onClick={() => setIsLoading((l) => !l)}
-        className={cn(
-          'fixed bottom-20 right-4 z-40 rounded-full border border-surface-3 bg-surface-1 px-3 py-1.5 font-mono text-[10px]',
-          isLoading ? 'text-primary' : 'text-muted-foreground',
-        )}
-      >
-        Toggle Loading
-      </button>
+     
 
       <BottomNav active="home" />
     </div>

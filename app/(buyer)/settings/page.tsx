@@ -144,7 +144,7 @@ export default function SettingsPage() {
 
       <SettingsSection label="Support">
         <SettingsRow icon={HelpCircle} label="Help Center" />
-        <SettingsRow icon={MessageSquare} label="Contact LOKA Support" />
+        <SettingsRow icon={MessageSquare} label="Contact Shopsy Support" />
         <SettingsRow icon={AlertTriangle} label="Report a Problem" last />
       </SettingsSection>
 
@@ -154,7 +154,7 @@ export default function SettingsPage() {
         <SettingsRow
           icon={Info}
           label="App Version"
-          value="v1.0.0 · loka.cm"
+          value="v1.0.0 · Shopsy.cm"
           valueClassName="font-mono"
           showChevron={false}
           last
@@ -184,7 +184,7 @@ export default function SettingsPage() {
       {/* Delete confirmation bottom sheet */}
       {showDelete ? (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60">
-          <div className="w-full max-w-[480px] animate-loka-fade-up rounded-t-2xl border-t border-surface-3 bg-surface-1 p-5">
+          <div className="w-full max-w-[480px] animate-Shopsy-fade-up rounded-t-2xl border-t border-surface-3 bg-surface-1 p-5">
             <div className="mb-3 flex items-center justify-between">
               <h2 className="font-heading text-lg text-error">Delete Account?</h2>
               <button
@@ -196,7 +196,7 @@ export default function SettingsPage() {
               </button>
             </div>
             <p className="text-[13px] leading-relaxed text-muted-foreground">
-              This permanently deletes your LOKA account, chats, bargains and
+              This permanently deletes your Shopsy account, chats, bargains and
               wishlist. This action cannot be undone.
             </p>
             <div className="mt-5 flex gap-2">

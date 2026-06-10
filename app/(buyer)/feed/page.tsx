@@ -114,7 +114,7 @@ export default function FeedPage() {
       <header className="sticky top-0 z-30 border-b border-surface-3 bg-surface-1">
         <div className="flex items-center justify-between px-4 py-3">
           <span className="font-heading text-2xl font-extrabold text-primary">
-            LOKA
+            Shopsy
           </span>
           <span className="flex items-center gap-1 rounded-full border border-surface-3 bg-surface-2 px-2.5 py-1">
             <MapPin size={11} className="text-primary" />

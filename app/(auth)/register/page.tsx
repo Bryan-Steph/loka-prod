@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { ArrowLeft, ShoppingBag, Store, ChevronRight } from 'lucide-react'
-import { LOKAWordmark } from '@/components/ui/loka-wordmark'
+import { ShopsyWordmark } from '@/components/ui/Shopsy-wordmark'
 
 export default function RegisterPage() {
   return (
@@ -14,14 +14,14 @@ export default function RegisterPage() {
         >
           <ArrowLeft size={22} />
         </Link>
-        <LOKAWordmark size={22} />
+        <ShopsyWordmark size={22} />
         <span className="h-8 w-8" aria-hidden="true" />
       </header>
 
       <div className="mx-auto mt-8 w-full max-w-[340px]">
-        <h1 className="font-syne text-[28px] font-bold text-foreground">Join LOKA</h1>
+        <h1 className="font-syne text-[28px] font-bold text-foreground">Join Shopsy</h1>
         <p className="mb-8 mt-1 text-[14px] text-muted-foreground">
-          How will you use LOKA?
+          How will you use Shopsy?
         </p>
 
         <div className="flex flex-col gap-4">

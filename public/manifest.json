@@ -1,27 +1,11 @@
 {
-  "name": "LOKA Marketplace",
-  "short_name": "LOKA",
-  "description": "Shop local products from vendors in Bamenda and beyond",
+  "name": "Shopsy — Bamenda Market",
+  "short_name": "Shopsy",
+  "description": "Find it. Bargain it. Get it. Bamenda's digital market.",
   "start_url": "/",
-  "scope": "/",
   "display": "standalone",
-  "orientation": "#f59e0b",
-  "background_color": "#05080f",
-  "theme_color": "#d97706",
+  "background_color": "#05080F",
+  "theme_color": "#F59E0B",
   "lang": "en",
-  "categories": ["shopping", "lifestyle"],
-  "icons": [
-    {
-      "src": "/icons/icon-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/icons/icon-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable any"
-    }
-  ]
+  "categories": ["shopping", "lifestyle"]
 }

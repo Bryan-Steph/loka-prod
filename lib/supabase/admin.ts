@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+//lib/supabase/admin.ts
 
 // This client bypasses Row Level Security.
 // Use ONLY in Route Handlers for operations that need to read data
@@ -19,3 +20,5 @@ export const adminSupabase = createClient(
     },
   }
 )
+// Alias — returns the singleton, safe to call multiple times
+export const createAdminSupabaseClient = () => adminSupabase

@@ -33,7 +33,7 @@ export function NotificationItem({
   return (
     <div
       className={cn(
-        'flex animate-loka-fade-in gap-3 px-4 py-3.5',
+        'flex animate-Shopsy-fade-in gap-3 px-4 py-3.5',
         unread
           ? 'border-l-[3px] border-primary bg-primary/[0.04]'
           : 'border-b border-surface-3',

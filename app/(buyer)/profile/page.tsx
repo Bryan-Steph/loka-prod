@@ -18,6 +18,7 @@ import {
   ChevronRight,
 } from 'lucide-react'
 import { BottomNav } from '@/components/buyer/BottomNav'
+import { LogoutButton } from '@/components/ui/LogoutButton'
 import { ActivityItem, type PickupStatus } from '@/components/buyer/ActivityItem'
 
 const STATS = [
@@ -167,12 +168,8 @@ export default function ProfilePage() {
       </div>
 
       {/* Sign out */}
-      <div className="px-4">
-        <button className="flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-error font-heading text-sm text-error">
-          <LogOut size={16} />
-          Sign Out
-        </button>
-      </div>
+    <LogoutButton />
+
 
       <BottomNav active="profile" />
     </div>
