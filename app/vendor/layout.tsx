@@ -1,0 +1,34 @@
+import { redirect } from 'next/navigation'
+import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { createAdminSupabaseClient } from '@/lib/supabase/admin'
+
+export default async function VendorLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  const supabase = await createSupabaseServerClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const admin = createAdminSupabaseClient()
+
+  const { data: profile } = await admin
+    .from('users')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+
+  if (!profile || profile.role !== 'vendor') redirect('/')
+
+  const { data: vendor } = await admin
+    .from('vendors')
+    .select('id')
+    .eq('user_id', user.id)
+    .single()
+
+  // No vendor row = new vendor, hasn't started onboarding yet
+  if (!vendor) redirect('/shop')
+
+  return <>{children}</>
+}
