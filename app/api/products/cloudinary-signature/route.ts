@@ -3,9 +3,9 @@ import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { getUploadSignature, UploadFolder } from '@/lib/utils/cloudinary'
 
 const ALLOWED_FOLDERS: UploadFolder[] = [
-  'Shopsy/products',
-  'Shopsy/identity_docs',
-  'Shopsy/shop_avatars',
+  'Loka/products',
+  'Loka/identity_docs',
+  'Loka/shop_avatars',
 ]
 
 export async function GET(req: NextRequest) {

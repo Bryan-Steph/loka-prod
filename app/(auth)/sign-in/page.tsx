@@ -8,7 +8,7 @@ export default function SignInPage() {
     <main className="flex min-h-dvh flex-col items-center justify-center bg-background px-6">
       <div className="w-full max-w-[380px]">
         <p className="mb-8 text-center font-heading text-[32px] font-extrabold text-primary">
-          Shopsy
+          Loka
         </p>
         <div className="rounded-2xl border border-surface-3 bg-surface-1 p-6">
           <h1 className="text-center font-heading text-[22px] text-foreground">

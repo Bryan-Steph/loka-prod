@@ -3,7 +3,7 @@
 import { useState, Suspense } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Mail, Lock, Eye, EyeOff, Loader2, AlertCircle } from 'lucide-react'
+import { Mail, Lock, Eye, EyeOff, Loader2, AlertCircle, ArrowLeft } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 
 function LoginForm() {
@@ -41,10 +41,19 @@ function LoginForm() {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4 py-8">
+      {/* Back button — fixed top-left */}
+      <button
+     type="button"
+  onClick={() => router.push('/')}
+  className="fixed left-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-surface-2 text-muted-foreground"
+  aria-label="Go home"
+      >
+  <ArrowLeft size={18} />
+      </button>
       {/* Wordmark */}
       <div className="mb-8 text-center">
         <span className="font-heading text-[36px] font-extrabold text-primary">
-          Shopsy
+          Loka
         </span>
         <p className="mt-1 text-[13px] text-muted-foreground">
           Find it. Bargain it. Get it.
@@ -157,7 +166,7 @@ function LoginForm() {
       </div>
 
       <p className="mt-6 font-mono text-[10px] text-muted-foreground">
-        v1.0.0 · Shopsy.cm
+        v1.0.0 · Loka.cm
       </p>
     </div>
   )

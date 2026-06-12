@@ -147,7 +147,7 @@ export function RegistrationFields() {
           )}
         </span>
         <span className="text-[12px] text-muted-foreground">
-          I agree to Shopsy&apos;s <span className="text-primary">Terms of Service</span>{' '}
+          I agree to Loka&apos;s <span className="text-primary">Terms of Service</span>{' '}
           and <span className="text-primary">Privacy Policy</span>
         </span>
       </button>

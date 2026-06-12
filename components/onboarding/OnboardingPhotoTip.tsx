@@ -37,7 +37,7 @@ export function OnboardingPhotoTip() {
               End-to-end encrypted
             </p>
             <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-              Only Shopsy admins can access uploaded documents. All documents are
+              Only Loka admins can access uploaded documents. All documents are
               permanently deleted within 48 hours of review, regardless of
               outcome.
             </p>

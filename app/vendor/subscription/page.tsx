@@ -7,7 +7,7 @@ export default function VendorSubscriptionPage() {
     <VendorComingSoon
       icon={CreditCard}
       title="Subscription"
-      description="Manage your Shopsy subscription plan."
+      description="Manage your Loka subscription plan."
       badge="Coming in Sprint 7"
     />
   )

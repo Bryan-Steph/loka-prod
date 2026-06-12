@@ -12,7 +12,7 @@ import { ImageUpload } from '@/components/ui/ImageUpload'
 
 const NEXT_STEPS = [
   { icon: ShieldCheck, label: 'ID submitted for review', done: false },
-  { icon: Search,      label: 'Shopsy admin verifies (24–48 hours)', done: false },
+  { icon: Search,      label: 'Loka admin verifies (24–48 hours)', done: false },
   { icon: BadgeCheck,  label: 'Verified badge added to your shop', done: false },
 ]
 
@@ -37,7 +37,7 @@ export default function IdentityStepPage() {
         const d = await res.json()
         throw new Error(d.error ?? 'Submission failed')
       }
-      router.push('/vendor/dashboard')
+router.push('/vendor/dashboard')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong')
       setSubmitting(false)
@@ -101,7 +101,7 @@ export default function IdentityStepPage() {
             </div>
           ) : (
             <ImageUpload
-              folder="Shopsy/identity_docs"
+              folder="Loka/identity_docs"
               accept="image/jpeg,image/png,application/pdf"
               maxSizeMB={5}
               resourceType="auto"
@@ -128,7 +128,7 @@ export default function IdentityStepPage() {
             </div>
           ) : (
             <ImageUpload
-              folder="Shopsy/identity_docs"
+              folder="Loka/identity_docs"
               accept="image/jpeg,image/png,application/pdf"
               maxSizeMB={5}
               resourceType="auto"

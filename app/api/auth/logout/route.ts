@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
     })
 
     // Clear our indicator — both maxAge AND expires required for all browsers
-    res.cookies.set('Shopsy-session', '', {
+    res.cookies.set('Loka-session', '', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',

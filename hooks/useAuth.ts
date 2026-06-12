@@ -4,8 +4,6 @@ import { useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuthStore, type AuthUser } from '@/store/authStore'
 
-// Module-level flag — prevents concurrent refresh calls across
-// multiple components mounting with useAuth() simultaneously
 let refreshPromise: Promise<void> | null = null
 
 export function useAuth() {
@@ -15,30 +13,28 @@ export function useAuth() {
 
   const hasAttemptedRefresh = useRef(false)
 
-  // On mount, attempt to restore session from HttpOnly cookie
   useEffect(() => {
     if (hasAttemptedRefresh.current) return
     hasAttemptedRefresh.current = true
 
-    // If already authenticated (another component already refreshed), skip
     if (isAuthenticated) {
       setLoading(false)
       return
     }
 
-    // Dedup: if a refresh is already in flight, wait for it
     if (refreshPromise) {
       refreshPromise.finally(() => setLoading(false))
       return
     }
 
     refreshPromise = fetch('/api/auth/refresh', {
-      method: 'POST',
+      method:      'POST',
       credentials: 'include',
     })
       .then(async (res) => {
         if (!res.ok) {
           clearAuth()
+          router.push('/login')
           return
         }
         const data = await res.json()
@@ -46,22 +42,25 @@ export function useAuth() {
           setAuth(data.token, data.user as AuthUser)
         } else {
           clearAuth()
+          router.push('/login')
         }
       })
       .catch(() => {
         clearAuth()
+        router.push('/login')
       })
       .finally(() => {
         refreshPromise = null
+        setLoading(false)
       })
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const login = async (email: string, password: string) => {
     const res = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method:      'POST',
+      headers:     { 'Content-Type': 'application/json' },
       credentials: 'include',
-      body: JSON.stringify({ email, password }),
+      body:        JSON.stringify({ email, password }),
     })
 
     const data = await res.json()
@@ -79,17 +78,17 @@ export function useAuth() {
   }
 
   const register = async (payload: {
-    full_name: string
-    email: string
-    phone: string
-    password: string
-    role: 'buyer' | 'vendor'
+    full_name:     string
+    email:         string
+    phone:         string
+    password:      string
+    role:          'buyer' | 'vendor'
     language_pref: 'en' | 'fr'
   }) => {
     const res = await fetch('/api/auth/register', {
-      method: 'POST',
+      method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+      body:    JSON.stringify(payload),
     })
 
     const data = await res.json()
@@ -107,7 +106,7 @@ export function useAuth() {
 
   const logout = async () => {
     await fetch('/api/auth/logout', {
-      method: 'POST',
+      method:      'POST',
       credentials: 'include',
     })
     clearAuth()

@@ -19,7 +19,7 @@ interface Product {
   photo_urls: string[] | null
   bargaining_allowed: boolean
   created_at: string
-  categories: { name_en: string } | null
+category_id: string | null
 }
 
 const CONDITION_LABELS: Record<string, string> = {

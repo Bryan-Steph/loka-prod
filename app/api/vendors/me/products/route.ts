@@ -19,15 +19,17 @@ export async function GET() {
 
   const { data: products, error } = await admin
     .from('products')
-    .select(`
-      id, name_en, price, condition,
-      is_active, is_in_stock, photo_urls,
-      bargaining_allowed, created_at,
-      categories ( name_en )
-    `)
+    .select(
+      'id, name_en, price, condition, is_active, is_in_stock, ' +
+      'photo_urls, bargaining_allowed, created_at, category_id'
+    )
     .eq('vendor_id', vendor.id)
     .order('created_at', { ascending: false })
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[vendors/me/products GET]', error.message)
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+
   return NextResponse.json({ products: products ?? [] })
 }

@@ -1,8 +1,9 @@
 import { redirect } from 'next/navigation'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { createAdminSupabaseClient } from '@/lib/supabase/admin'
+import { VerificationGate } from '@/components/vendor/VerificationGate'
 
-export default async function VendorLayout({
+export default async function NewProductLayout({
   children,
 }: {
   children: React.ReactNode
@@ -12,27 +13,17 @@ export default async function VendorLayout({
   if (!user) redirect('/login')
 
   const admin = createAdminSupabaseClient()
-
-  const { data: profile } = await admin
-    .from('users')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
-  if (!profile || profile.role !== 'vendor') redirect('/login')
-
   const { data: vendor } = await admin
     .from('vendors')
-    .select('id')
+    .select('verification_status')
     .eq('user_id', user.id)
     .single()
 
-  // No vendor row → onboarding incomplete
   if (!vendor) redirect('/shop')
 
-  // Verification status no longer gates the whole vendor area —
-  // unverified vendors can use the dashboard, browse, and edit
-  // their shop. Only product publishing is gated — see
-  // app/vendor/products/new/layout.tsx
+  if (vendor.verification_status !== 'approved') {
+    return <VerificationGate status={vendor.verification_status} />
+  }
+
   return <>{children}</>
 }

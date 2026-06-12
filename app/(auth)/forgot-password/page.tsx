@@ -77,7 +77,7 @@ export default function ForgotPasswordPage() {
 
       {/* Wordmark */}
       <span className="mb-8 font-heading text-[32px] font-extrabold text-primary">
-        Shopsy
+        Loka
       </span>
 
       <div className="w-full max-w-[380px] rounded-2xl border border-surface-3 bg-surface-1 p-6">

@@ -11,7 +11,7 @@
   --font-syne: var(--font-syne), 'Syne Fallback', sans-serif;
   --font-heading: var(--font-syne), 'Syne Fallback', sans-serif;
 
-  /* Shopsy brand */
+  /* Loka brand */
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary-dark: var(--primary-dark);
@@ -56,38 +56,42 @@
 }
 
 :root {
-  /* Shopsy — dark theme only */
-  --primary: #f59e0b;
+  /* Primary — amber, unchanged */
+  --primary:            #f59e0b;
   --primary-foreground: #05080f;
-  --primary-dark: #d97706;
-  --primary-light: #fcd34d;
+  --primary-dark:       #d97706;
+  --primary-light:      #fcd34d;
 
-  --background: #05080f;
-  --foreground: #e2eaf4;
+  /* Backgrounds — deep navy instead of near-black.
+     Surface steps are now more distinct so card edges are readable. */
+  --background:         #07101e;   /* was #05080f */
+  --foreground:         #d8e6f3;   /* was #e2eaf4 — slightly softer white */
 
-  --surface-1: #0d1424;
-  --surface-2: #111d30;
-  --surface-3: #1a2640;
+  --surface-1:          #0d1b2e;   /* was #0d1424 */
+  --surface-2:          #132338;   /* was #111d30 */
+  --surface-3:          #1a2d46;   /* was #1a2640 — borders now visible */
 
-  --muted-foreground: #8090a8;
+  --muted-foreground:   #7a98b8;   /* was #8090a8 — slightly more legible */
 
-  --success: #10b981;
-  --error: #ef4444;
-  --warning: #f59e0b;
+  /* Semantic */
+  --success:   #10b981;
+  --error:     #ef4444;
+  --warning:   #f59e0b;
 
-  --card: #0d1424;
-  --card-foreground: #e2eaf4;
-  --popover: #0d1424;
-  --popover-foreground: #e2eaf4;
-  --secondary: #111d30;
-  --secondary-foreground: #e2eaf4;
-  --muted: #111d30;
-  --accent: #1a2640;
-  --accent-foreground: #e2eaf4;
-  --destructive: #ef4444;
-  --border: #1a2640;
-  --input: #111d30;
-  --ring: #f59e0b;
+  /* shadcn tokens — kept in sync with surfaces above */
+  --card:                  #0d1b2e;
+  --card-foreground:       #d8e6f3;
+  --popover:               #0d1b2e;
+  --popover-foreground:    #d8e6f3;
+  --secondary:             #132338;
+  --secondary-foreground:  #d8e6f3;
+  --muted:                 #132338;
+  --accent:                #1a2d46;
+  --accent-foreground:     #d8e6f3;
+  --destructive:           #ef4444;
+  --border:                #1a2d46;
+  --input:                 #132338;
+  --ring:                  #f59e0b;
 
   --radius: 0.625rem;
 }
@@ -112,7 +116,7 @@
   }
 }
 
-@keyframes Shopsy-pulse-ring {
+@keyframes Loka-pulse-ring {
   0% {
     box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
   }
@@ -125,5 +129,5 @@
 }
 
 .animate-pulse-ring {
-  animation: Shopsy-pulse-ring 1.8s infinite;
+  animation: Loka-pulse-ring 1.8s infinite;
 }

@@ -1,5 +1,10 @@
 'use client'
 
+import {  useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { useAuth } from '@/hooks/useAuth'
+
+
 import { useState } from 'react'
 import Link from 'next/link'
 import {
@@ -27,6 +32,16 @@ import { cn } from '@/lib/utils'
 import { BottomNav } from '@/components/buyer/BottomNav'
 import { SettingsSection } from '@/components/ui/SettingsSection'
 import { SettingsRow, Toggle } from '@/components/ui/SettingsRow'
+
+
+interface Profile {
+  id: string
+  full_name: string | null
+  email: string
+  phone: string | null
+  avatar_url: string | null
+  role: string
+}
 
 function LangChips() {
   const [lang, setLang] = useState<'EN' | 'FR'>('EN')
@@ -57,6 +72,30 @@ export default function SettingsPage() {
   const [priceDrops, setPriceDrops] = useState(false)
   const [smsAlerts, setSmsAlerts] = useState(true)
   const [showDelete, setShowDelete] = useState(false)
+  const [loggingOut, setLoggingOut] = useState(false)
+  const [profile, setProfile]       = useState<Profile | null>(null)
+    const router                      = useRouter()
+      const { user: authUser, logout }  = useAuth()
+    
+  
+
+  useEffect(() => {
+    fetch('/api/users/me')
+      .then(r => r.json())
+      .then(d => { if (d.profile) setProfile(d.profile) })
+      .catch(console.error)
+  }, [])
+
+  const handleLogout = async () => {
+      setLoggingOut(true)
+      try {
+        await logout()
+        router.push('/login')
+        router.refresh()
+      } catch {
+        setLoggingOut(false)
+      }
+    }
 
   return (
     <div className="mx-auto min-h-dvh max-w-[480px] space-y-5 bg-background pb-24">
@@ -144,7 +183,7 @@ export default function SettingsPage() {
 
       <SettingsSection label="Support">
         <SettingsRow icon={HelpCircle} label="Help Center" />
-        <SettingsRow icon={MessageSquare} label="Contact Shopsy Support" />
+        <SettingsRow icon={MessageSquare} label="Contact Loka Support" />
         <SettingsRow icon={AlertTriangle} label="Report a Problem" last />
       </SettingsSection>
 
@@ -154,7 +193,7 @@ export default function SettingsPage() {
         <SettingsRow
           icon={Info}
           label="App Version"
-          value="v1.0.0 · Shopsy.cm"
+          value="v1.0.0 · Loka.cm"
           valueClassName="font-mono"
           showChevron={false}
           last
@@ -174,17 +213,21 @@ export default function SettingsPage() {
         />
       </SettingsSection>
 
-      <div className="px-4">
-        <button className="flex h-[52px] w-full items-center justify-center gap-2 rounded-xl border border-error font-heading text-[15px] text-error">
-          <LogOut size={18} />
-          Sign Out
+    
+        {/* Logout */}
+        <button
+          onClick={handleLogout}
+          disabled={loggingOut}
+          className="mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-error/30 text-[14px] font-medium text-error disabled:opacity-60"
+        >
+          <LogOut size={16} />
+          {loggingOut ? 'Signing out…' : 'Sign Out'}
         </button>
-      </div>
 
       {/* Delete confirmation bottom sheet */}
       {showDelete ? (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60">
-          <div className="w-full max-w-[480px] animate-Shopsy-fade-up rounded-t-2xl border-t border-surface-3 bg-surface-1 p-5">
+          <div className="w-full max-w-[480px] animate-Loka-fade-up rounded-t-2xl border-t border-surface-3 bg-surface-1 p-5">
             <div className="mb-3 flex items-center justify-between">
               <h2 className="font-heading text-lg text-error">Delete Account?</h2>
               <button
@@ -196,7 +239,7 @@ export default function SettingsPage() {
               </button>
             </div>
             <p className="text-[13px] leading-relaxed text-muted-foreground">
-              This permanently deletes your Shopsy account, chats, bargains and
+              This permanently deletes your Loka account, chats, bargains and
               wishlist. This action cannot be undone.
             </p>
             <div className="mt-5 flex gap-2">

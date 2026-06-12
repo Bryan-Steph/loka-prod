@@ -82,13 +82,22 @@ export default function VendorRegisterPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Back button — fixed top-left */}
+<button
+  type="button"
+  onClick={() => router.push('/')}
+  className="fixed left-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-surface-2 text-muted-foreground"
+  aria-label="Go home"
+>
+  <ArrowLeft size={18} />
+</button>
       {/* Top bar */}
       <div className="flex items-center justify-between px-4 py-4">
         <Link href="/register">
           <ArrowLeft size={24} className="text-foreground" />
         </Link>
         <span className="font-heading text-[22px] font-extrabold text-primary">
-          Shopsy
+          Loka
         </span>
         <div className="w-6" />
       </div>
@@ -115,7 +124,7 @@ export default function VendorRegisterPage() {
 
       <div className="px-4 pb-10">
         <h1 className="mt-4 font-heading text-[22px] text-foreground">
-          Start Selling on Shopsy
+          Start Selling on Loka
         </h1>
         <p className="mt-1 text-[13px] text-muted-foreground">
           First, let&apos;s set up your account
@@ -272,7 +281,7 @@ export default function VendorRegisterPage() {
                 )}
               </span>
               <span className="text-xs text-muted-foreground">
-                I agree to Shopsy&apos;s{' '}
+                I agree to Loka&apos;s{' '}
                 <span className="font-semibold text-primary">
                   Terms of Service
                 </span>{' '}

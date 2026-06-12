@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils'
 
-export function ShopsyWordmark({
+export function LokaWordmark({
   size = 26,
   tagline = false,
   className,
@@ -15,7 +15,7 @@ export function ShopsyWordmark({
         className="font-syne font-extrabold tracking-tight text-primary leading-none"
         style={{ fontSize: size }}
       >
-        Shopsy
+        Loka
       </span>
       {tagline && (
         <span className="mt-2 text-[13px] text-muted-foreground">

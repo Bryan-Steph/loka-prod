@@ -77,17 +77,17 @@ export default function AddProductPage() {
       const res = await fetch('/api/products', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name_en:            name.trim(),
-          description:        description.trim() || null,
-          price:              priceInt,
-          condition,
-          category_id:        categoryId,
-          photo_urls:         filledPhotos,
-          bargaining_allowed: bargain,
-          min_bargain_price:  bargain ? minPriceInt : null,
-          is_in_stock:        inStock,
-        }),
+      body: JSON.stringify({
+  name_en:            name.trim(),
+  description_en:     description.trim() || null,      // was: description
+  price:              priceInt,
+  condition,
+  category_id:        categoryId,
+  photo_urls:         filledPhotos,
+  bargaining_allowed: bargain,
+  min_bargain_price:  bargain ? minPriceInt : null,
+  stock_status:       inStock ? 'in_stock' : 'out_of_stock',  // was: is_in_stock
+}),
       })
 
       if (!res.ok) {
@@ -160,7 +160,7 @@ export default function AddProductPage() {
                   </>
                 ) : (
                   <ImageUpload
-                    folder="Shopsy/products"
+                    folder="Loka/products"
                     onUpload={(u) => setPhotoAt(i, u)}
                     onError={setError}
                     className="h-full w-full"

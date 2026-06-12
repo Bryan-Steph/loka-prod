@@ -33,11 +33,13 @@ export async function POST(req: NextRequest) {
 
   const body = await req.json()
   const parsed = CreateProductSchema.safeParse(body)
+
   if (!parsed.success) {
-    return NextResponse.json(
-      { error: parsed.error.flatten().fieldErrors },
-      { status: 400 }
-    )
+    // Flatten to a single string — frontend checks typeof d.error === 'string'
+    const firstError =
+      Object.values(parsed.error.flatten().fieldErrors).flat()[0] ??
+      'Validation failed — check all fields'
+    return NextResponse.json({ error: firstError }, { status: 400 })
   }
 
   const {
@@ -80,10 +82,7 @@ export async function GET(req: NextRequest) {
 
   let query = admin
     .from('products')
-    .select(
-      `*, vendors(id, shop_name, shop_avatar_url, verification_status)`,
-      { count: 'exact' }
-    )
+    .select('*, vendors(id, shop_name, shop_avatar_url, verification_status)', { count: 'exact' })
     .eq('is_published', true)
     .is('deleted_at', null)
     .order('created_at', { ascending: false })

@@ -25,12 +25,23 @@ export function SettingsRow({
   last?: boolean
   onClick?: () => void
 }) {
+  // Root is now <div>, not <button>.
+  // When control is present (Toggle, LangChips, etc.) the control handles its
+  // own interactivity — the row must NOT be a <button> or nesting errors fire.
+  // When no control + onClick exists, role="button" preserves accessibility.
   return (
-    <button
-      type="button"
+    <div
       onClick={onClick}
+      role={onClick && !control ? 'button' : undefined}
+      tabIndex={onClick && !control ? 0 : undefined}
+      onKeyDown={
+        onClick && !control
+          ? (e) => { if (e.key === 'Enter' || e.key === ' ') onClick() }
+          : undefined
+      }
       className={cn(
-        'flex min-h-[52px] w-full items-center gap-3 px-4 py-2.5 text-left transition-colors active:bg-surface-2',
+        'flex min-h-[52px] w-full items-center gap-3 px-4 py-2.5 text-left transition-colors',
+        onClick && 'cursor-pointer active:bg-surface-2',
         !last && 'border-b border-surface-3',
       )}
     >
@@ -38,21 +49,11 @@ export function SettingsRow({
         size={18}
         className={cn(danger ? 'text-error' : 'text-muted-foreground')}
       />
-      <span
-        className={cn(
-          'flex-1 text-sm',
-          danger ? 'text-error' : 'text-foreground',
-        )}
-      >
+      <span className={cn('flex-1 text-sm', danger ? 'text-error' : 'text-foreground')}>
         {label}
       </span>
       {value ? (
-        <span
-          className={cn(
-            'text-right text-xs text-muted-foreground',
-            valueClassName,
-          )}
-        >
+        <span className={cn('text-right text-xs text-muted-foreground', valueClassName)}>
           {value}
         </span>
       ) : null}
@@ -60,7 +61,7 @@ export function SettingsRow({
       {showChevron && !control ? (
         <ChevronRight size={18} className="text-muted-foreground" />
       ) : null}
-    </button>
+    </div>
   )
 }
 

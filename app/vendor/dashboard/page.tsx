@@ -6,11 +6,12 @@ import Link from 'next/link'
 import {
   X, Package, Eye, MessageSquare,
   Plus, Store, Inbox, CheckCircle2,
-  CreditCard, ChevronRight,
+  CreditCard, ChevronRight, Lock,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/useAuth'
 import { VendorShell } from '@/components/vendor/VendorShell'
+import { VerificationBanner } from '@/components/vendor/VerificationBanner'
 
 function greeting() {
   const h = new Date().getHours()
@@ -25,6 +26,11 @@ interface Stats {
   enquiries: number
 }
 
+interface VendorInfo {
+  verification_status: string | null
+  suspension_reason: string | null
+}
+
 function VendorDashboardContent() {
   const params = useSearchParams()
   const { user } = useAuth()
@@ -32,6 +38,7 @@ function VendorDashboardContent() {
   const [toast, setToast]           = useState(params.get('published') === '1')
   const [stats, setStats]           = useState<Stats | null>(null)
   const [vendorName, setVendorName] = useState<string | null>(null)
+  const [vendor, setVendor]         = useState<VendorInfo | null>(null)
 
   useEffect(() => {
     fetch('/api/users/me')
@@ -41,9 +48,22 @@ function VendorDashboardContent() {
     fetch('/api/vendors/me/stats')
       .then(r => r.json())
       .then(d => { if (d.stats) setStats(d.stats) })
+
+    fetch('/api/vendors/me')
+      .then(r => r.json())
+      .then(d => {
+        if (d.vendor) {
+          setVendor({
+            verification_status: d.vendor.verification_status ?? null,
+            suspension_reason: d.vendor.suspension_reason ?? null,
+          })
+        }
+      })
   }, [])
 
   const displayName = vendorName ?? user?.full_name ?? '…'
+  const isApproved = vendor?.verification_status === 'approved'
+  const verificationKnown = vendor !== null
 
   return (
     <VendorShell>
@@ -72,6 +92,14 @@ function VendorDashboardContent() {
           {greeting()}, {displayName}
         </h1>
 
+        {/* Verification banner — hidden once approved */}
+        {verificationKnown && (
+          <VerificationBanner
+            status={vendor?.verification_status}
+            reason={vendor?.suspension_reason}
+          />
+        )}
+
         {/* Subscription placeholder — wired in Sprint 7 */}
         <div className="mt-4 flex items-center gap-3 rounded-2xl border border-surface-3 bg-surface-1 p-4">
           <CreditCard size={20} className="shrink-0 text-primary" />
@@ -93,8 +121,11 @@ function VendorDashboardContent() {
         <div className="mt-4 flex gap-2">
           <Link
             href="/vendor/products/new"
-            className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-primary py-3 text-[13px] font-semibold text-primary-foreground"
+            className="relative flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-primary py-3 text-[13px] font-semibold text-primary-foreground"
           >
+            {!isApproved && verificationKnown && (
+              <Lock size={12} className="absolute right-2.5 top-2.5 text-primary-foreground/70" />
+            )}
             <Plus size={16} />
             Add Product
           </Link>

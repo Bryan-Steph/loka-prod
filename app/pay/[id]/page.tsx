@@ -104,7 +104,7 @@ export default function PayPage() {
             <div className="flex gap-2.5 rounded-xl border-l-[3px] border-primary bg-surface-2 p-3">
               <ShieldCheck size={16} className="mt-0.5 shrink-0 text-primary" />
               <p className="text-[12px] text-muted-foreground">
-                Your payment is held safely by Shopsy until you physically collect your
+                Your payment is held safely by Loka until you physically collect your
                 item. Funds are only released when you enter the vendor&apos;s pickup
                 code.
               </p>
@@ -113,7 +113,7 @@ export default function PayPage() {
             <div className="rounded-2xl border border-surface-3 bg-surface-1 p-4">
               <Row label="Product" value="40,000 XAF" />
               <Row
-                label="Shopsy escrow fee (2%)"
+                label="Loka escrow fee (2%)"
                 value="800 XAF"
                 muted
               />
@@ -191,7 +191,7 @@ export default function PayPage() {
                 Payment received!
               </h2>
               <p className="mt-1 text-[13px] text-muted-foreground">
-                Your Shopsy escrow is holding 40,000 XAF
+                Your Loka escrow is holding 40,000 XAF
               </p>
             </div>
 
@@ -326,7 +326,7 @@ export default function PayPage() {
               Payment Released!
             </h2>
             <p className="mt-2 text-[13px] text-muted-foreground">
-              40,000 XAF sent to your Mobile Money. Thank you for using Shopsy.
+              40,000 XAF sent to your Mobile Money. Thank you for using Loka.
             </p>
             <Link
               href="/"

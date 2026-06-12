@@ -155,8 +155,8 @@ export interface DbTransaction {
   product_id: string
   bargain_offer_id: string | null
   agreed_price: number                      // XAF integer
-  Shopsy_fee: number                          // XAF integer (2%)
-  total_charged: number                     // agreed_price + Shopsy_fee
+  Loka_fee: number                          // XAF integer (2%)
+  total_charged: number                     // agreed_price + Loka_fee
   status: TransactionStatus
   fapshi_reference: string | null
   payment_method: string | null

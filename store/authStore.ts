@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 
+//lib/store/authStore.ts
 export type UserRole = 'buyer' | 'vendor' | 'admin'
 
 export interface AuthUser {

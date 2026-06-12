@@ -1,175 +1,131 @@
 'use client'
 
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
-  Settings,
-  User,
-  Camera,
-  Pencil,
-  ShoppingBag,
-  MessageSquare,
-  Heart,
-  Shield,
-  CreditCard,
-  Bell,
-  Globe,
-  HelpCircle,
-  LogOut,
-  ChevronRight,
+  User, Bell, Settings, Heart,
+  MessageSquare, LogOut, ChevronRight,
+  Mail, Phone, ShieldCheck,
 } from 'lucide-react'
-import { BottomNav } from '@/components/buyer/BottomNav'
-import { LogoutButton } from '@/components/ui/LogoutButton'
-import { ActivityItem, type PickupStatus } from '@/components/buyer/ActivityItem'
+import { BottomNav } from '@/components/ui/bottom-nav'
+import { useAuth } from '@/hooks/useAuth'
+import { cn } from '@/lib/utils'
 
-const STATS = [
-  { icon: ShoppingBag, value: '3', label: 'Purchases' },
-  { icon: MessageSquare, value: '2', label: 'Bargains' },
-  { icon: Heart, value: '8', label: 'Saved' },
+interface Profile {
+  id: string
+  full_name: string | null
+  email: string
+  phone: string | null
+  avatar_url: string | null
+  role: string
+}
+
+const LINKS = [
+  { icon: Heart,         label: 'Wishlist',       href: '/wishlist'       },
+  { icon: MessageSquare, label: 'Messages',        href: '/chat'           },
+  { icon: Bell,          label: 'Notifications',   href: '/notifications'  },
+  { icon: Settings,      label: 'Settings',        href: '/settings'       },
 ]
 
-const ACTIVITY: {
-  product: string
-  vendor: string
-  date: string
-  amount: string
-  status: PickupStatus
-}[] = [
-  {
-    product: 'Samsung Galaxy A32',
-    vendor: 'Mama Agnes Electronics',
-    date: '12 May 2026',
-    amount: '40,500 XAF',
-    status: 'PICKED UP',
-  },
-  {
-    product: 'JBL-style Speaker',
-    vendor: 'Tech Corner',
-    date: '8 May 2026',
-    amount: '11,500 XAF',
-    status: 'PICKED UP',
-  },
-  {
-    product: 'Ankara Print Fabric',
-    vendor: 'Fabrics Palace',
-    date: '2 Jun 2026',
-    amount: '4,500 XAF',
-    status: 'PENDING PICKUP',
-  },
-]
+export default function BuyerProfilePage() {
+  const router                      = useRouter()
+  const { user: authUser, logout }  = useAuth()
+  const [profile, setProfile]       = useState<Profile | null>(null)
+  const [loggingOut, setLoggingOut] = useState(false)
 
-const ACCOUNT_LINKS = [
-  { icon: Shield, label: 'Privacy & Security' },
-  { icon: CreditCard, label: 'Payment History', value: '3 transactions' },
-  { icon: Bell, label: 'Notification Preferences' },
-  { icon: Globe, label: 'Language: English', value: 'EN | FR' },
-  { icon: HelpCircle, label: 'Help & Support' },
-]
+  useEffect(() => {
+    fetch('/api/users/me')
+      .then(r => r.json())
+      .then(d => { if (d.profile) setProfile(d.profile) })
+      .catch(console.error)
+  }, [])
 
-export default function ProfilePage() {
+  const handleLogout = async () => {
+    setLoggingOut(true)
+    try {
+      await logout()
+      router.push('/login')
+      router.refresh()
+    } catch {
+      setLoggingOut(false)
+    }
+  }
+
+  const name  = profile?.full_name  ?? authUser?.full_name  ?? '…'
+  const email = profile?.email      ?? authUser?.email      ?? '—'
+  const phone = profile?.phone      ?? authUser?.phone      ?? null
+
   return (
-    <div className="mx-auto min-h-dvh max-w-[480px] space-y-4 bg-background pb-24">
-      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-surface-3 bg-surface-1 px-4 py-3.5">
-        <h1 className="font-heading text-xl text-foreground">My Profile</h1>
-        <Link href="/settings" aria-label="Settings" className="text-muted-foreground">
-          <Settings size={22} />
-        </Link>
+    <div className="min-h-screen bg-background pb-24">
+      {/* Header */}
+      <header className="sticky top-0 z-10 flex h-14 items-center justify-center border-b border-surface-3 bg-background/95 backdrop-blur">
+        <span className="font-syne text-[22px] font-extrabold text-primary">LOKA</span>
       </header>
 
-      {/* Profile header card */}
-      <div className="mx-4 flex flex-col items-center rounded-2xl border border-surface-3 bg-surface-1 p-5">
-        <div className="relative">
-          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-surface-2">
-            <User size={36} className="text-muted-foreground" />
+      <div className="mx-auto w-full max-w-[480px] px-4 pt-5">
+        <h1 className="font-syne text-[20px] font-bold text-foreground">My Profile</h1>
+
+        {/* Identity card */}
+        <div className="mt-4 flex flex-col items-center rounded-2xl border border-surface-3 bg-surface-1 px-4 py-6">
+          <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-surface-2">
+            {profile?.avatar_url
+              ? <img src={profile.avatar_url} alt={name} className="h-full w-full object-cover" />
+              : <User size={32} className="text-muted-foreground" />
+            }
           </div>
-          <button
-            aria-label="Edit photo"
-            className="absolute -bottom-0.5 -right-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-primary"
-          >
-            <Camera size={14} className="text-primary-foreground" />
-          </button>
-        </div>
-        <p className="mt-3 font-heading text-xl text-foreground">Nkeng Alain</p>
-        <p className="font-mono text-[13px] text-muted-foreground">
-          +237 674 528 557
-        </p>
-        <p className="text-xs text-muted-foreground">nkeng.alain@gmail.com</p>
-        <button className="mt-3 flex h-10 w-[120px] items-center justify-center gap-1.5 rounded-xl border border-primary text-[13px] text-primary">
-          <Pencil size={14} />
-          Edit Profile
-        </button>
-      </div>
 
-      {/* Stats row */}
-      <div className="mx-4 grid grid-cols-3 gap-2.5">
-        {STATS.map((s) => {
-          const Icon = s.icon
-          return (
-            <div
-              key={s.label}
-              className="flex flex-col items-center gap-1 rounded-xl bg-surface-2 py-3"
-            >
-              <Icon size={20} className="text-primary" />
-              <span className="font-mono text-2xl text-primary">{s.value}</span>
-              <span className="text-[11px] text-muted-foreground">
-                {s.label}
-              </span>
+          <p className="mt-3 font-syne text-[18px] font-bold text-foreground">{name}</p>
+
+          <div className="mt-2 flex flex-col items-center gap-1">
+            <div className="flex items-center gap-1.5">
+              <Mail size={12} className="text-muted-foreground" />
+              <span className="text-[13px] text-muted-foreground">{email}</span>
             </div>
-          )
-        })}
-      </div>
+            {phone && (
+              <div className="flex items-center gap-1.5">
+                <Phone size={12} className="text-muted-foreground" />
+                <span className="font-mono text-[13px] text-muted-foreground">{phone}</span>
+              </div>
+            )}
+          </div>
 
-      {/* Recent activity */}
-      <div className="mx-4 overflow-hidden rounded-2xl border border-surface-3 bg-surface-1">
-        <div className="flex items-center justify-between px-4 py-3">
-          <h2 className="font-heading text-sm text-foreground">
-            Recent Activity
-          </h2>
-          <button className="text-xs text-primary">View all →</button>
+          <div className="mt-3 flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1">
+            <ShieldCheck size={12} className="text-primary" />
+            <span className="text-[11px] font-medium text-primary">Verified Buyer</span>
+          </div>
         </div>
-        <div className="border-t border-surface-3">
-          {ACTIVITY.map((a, i) => (
-            <ActivityItem
-              key={a.product}
-              {...a}
-              last={i === ACTIVITY.length - 1}
-            />
+
+        {/* Nav links */}
+        <div className="mt-3 overflow-hidden rounded-2xl border border-surface-3 bg-surface-1">
+          {LINKS.map(({ icon: Icon, label, href }, i) => (
+            <Link
+              key={href}
+              href={href}
+              className={cn(
+                'flex h-[52px] items-center gap-3 px-4 text-foreground transition-colors hover:bg-surface-2',
+                i < LINKS.length - 1 && 'border-b border-surface-3',
+              )}
+            >
+              <Icon size={17} className="shrink-0 text-muted-foreground" />
+              <span className="flex-1 text-[14px]">{label}</span>
+              <ChevronRight size={16} className="text-muted-foreground" />
+            </Link>
           ))}
         </div>
+
+        {/* Logout */}
+        <button
+          onClick={handleLogout}
+          disabled={loggingOut}
+          className="mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-xl border border-error/30 text-[14px] font-medium text-error disabled:opacity-60"
+        >
+          <LogOut size={16} />
+          {loggingOut ? 'Signing out…' : 'Sign Out'}
+        </button>
+
+      
       </div>
-
-      {/* Account section */}
-      <div className="mx-4 overflow-hidden rounded-2xl border border-surface-3 bg-surface-1">
-        {ACCOUNT_LINKS.map((link, i) => {
-          const Icon = link.icon
-          return (
-            <button
-              key={link.label}
-              className="flex h-[52px] w-full items-center gap-3 px-4 text-left active:bg-surface-2"
-              style={{
-                borderBottom:
-                  i === ACCOUNT_LINKS.length - 1
-                    ? undefined
-                    : '1px solid var(--surface-3)',
-              }}
-            >
-              <Icon size={18} className="text-muted-foreground" />
-              <span className="flex-1 text-sm text-foreground">
-                {link.label}
-              </span>
-              {link.value ? (
-                <span className="font-mono text-[10px] text-primary">
-                  {link.value}
-                </span>
-              ) : null}
-              <ChevronRight size={18} className="text-muted-foreground" />
-            </button>
-          )
-        })}
-      </div>
-
-      {/* Sign out */}
-    <LogoutButton />
-
 
       <BottomNav active="profile" />
     </div>

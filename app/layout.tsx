@@ -24,7 +24,7 @@ const dmMono = DM_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'Shopsy — Find it. Bargain it. Get it.',
+  title: 'Loka — Find it. Bargain it. Get it.',
   description: "Bamenda's digital market. Verified vendors, safe bargaining, real pickup.",
   manifest: '/manifest.json',
 }

@@ -12,13 +12,14 @@ import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/useAuth'
 
 const NAV_ITEMS = [
-  { icon: LayoutDashboard, label: 'Dashboard',     href: '/vendor/dashboard' },
-  { icon: Package,         label: 'Products',      href: '/vendor/products'  },
-  { icon: MessageSquare,   label: 'Enquiries',     href: '/vendor/enquiries' },
-  { icon: Store,           label: 'My Shop',       href: '/vendor/shop'      },
-  { icon: CreditCard,      label: 'Subscription',  href: '/vendor/subscription' },
-  { icon: Bell,            label: 'Notifications', href: '/vendor/notifications' },
-  { icon: Settings,        label: 'Settings',      href: '/vendor/settings'  },
+  { icon: LayoutDashboard, label: 'Dashboard',     href: '/vendor/dashboard'      },
+  { icon: Package,         label: 'Products',      href: '/vendor/products'       },
+  { icon: MessageSquare,   label: 'Enquiries',     href: '/vendor/enquiries'      },
+  { icon: Store,           label: 'My Shop',       href: '/vendor/shop'           },
+  { icon: CreditCard,      label: 'Subscription',  href: '/vendor/subscription'   },
+  { icon: Bell,            label: 'Notifications', href: '/vendor/notifications'  },
+  { icon: User,            label: 'My Profile',    href: '/vendor/profile'        },
+  { icon: Settings,        label: 'Settings',      href: '/vendor/settings'       },
 ]
 
 interface VendorShellProps {
@@ -56,7 +57,7 @@ export function VendorShell({ children }: VendorShellProps) {
           <Menu size={22} />
         </button>
 
-        <span className="font-syne text-[24px] font-extrabold text-primary">Shopsy</span>
+        <span className="font-syne text-[24px] font-extrabold text-primary">LOKA</span>
 
         <div className="flex items-center gap-1">
           <Link
@@ -66,10 +67,11 @@ export function VendorShell({ children }: VendorShellProps) {
           >
             <Bell size={22} />
           </Link>
+          {/* Changed: settings → profile */}
           <Link
-            href="/vendor/settings"
+            href="/vendor/profile"
             className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-2 text-muted-foreground"
-            aria-label="Settings"
+            aria-label="Profile"
           >
             <User size={16} />
           </Link>
@@ -86,7 +88,7 @@ export function VendorShell({ children }: VendorShellProps) {
           />
           <aside className="fixed inset-y-0 left-0 z-50 flex w-[280px] flex-col bg-surface-1 shadow-xl">
             <div className="flex h-14 items-center justify-between border-b border-surface-3 px-4">
-              <span className="font-syne text-[22px] font-extrabold text-primary">Shopsy</span>
+              <span className="font-syne text-[22px] font-extrabold text-primary">LOKA</span>
               <button
                 onClick={() => setDrawerOpen(false)}
                 className="text-muted-foreground"
@@ -130,7 +132,7 @@ export function VendorShell({ children }: VendorShellProps) {
               className="flex h-14 items-center gap-3 border-t border-surface-3 px-4 text-[14px] text-error disabled:opacity-60"
             >
               <LogOut size={18} />
-              {loggingOut ? 'Signing out...' : 'Sign Out'}
+              {loggingOut ? 'Signing out…' : 'Sign Out'}
             </button>
           </aside>
         </>

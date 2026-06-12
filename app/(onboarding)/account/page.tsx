@@ -46,7 +46,7 @@ export default function AccountStepPage() {
       backHref="/login"
       topTitle={
         <span className="font-heading text-[26px] font-extrabold text-primary">
-          Shopsy
+          Loka
         </span>
       }
       footer={
@@ -147,7 +147,7 @@ export default function AccountStepPage() {
             {agreed && <Check size={14} className="text-primary-foreground" />}
           </span>
           <span className="text-xs text-muted-foreground">
-            I agree to Shopsy&apos;s{' '}
+            I agree to Loka&apos;s{' '}
             <span className="font-semibold text-primary">Terms of Service</span>{' '}
             and{' '}
             <span className="font-semibold text-primary">Privacy Policy</span>

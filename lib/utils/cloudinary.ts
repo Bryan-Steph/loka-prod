@@ -14,9 +14,9 @@ if (isConfigured) {
 }
 
 export type UploadFolder =
-  | 'Shopsy/products'
-  | 'Shopsy/identity_docs'
-  | 'Shopsy/shop_avatars'
+  | 'Loka/products'
+  | 'Loka/identity_docs'
+  | 'Loka/shop_avatars'
 
 export function getUploadSignature(
   folder: UploadFolder,

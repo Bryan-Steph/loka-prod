@@ -1,31 +1,13 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@supabase/ssr'
+import { NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
 import { adminSupabase } from '@/lib/supabase/admin'
 
-export async function POST(req: NextRequest) {
+export async function POST() {
   try {
-    const pendingCookies: Array<{
-      name: string; value: string; options: Record<string, unknown>
-    }> = []
+    const supabase = await createClient()
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
 
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() { return req.cookies.getAll() },
-          setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              pendingCookies.push({ name, value, options: options as Record<string, unknown> })
-            )
-          },
-        },
-      }
-    )
-
-    // Verifies JWT with Supabase Auth server — auto-refreshes if expired
-    const { data: { user }, error } = await supabase.auth.getUser()
-    if (error || !user) {
+    if (userError || !user) {
       return NextResponse.json({ error: 'No valid session.' }, { status: 401 })
     }
 
@@ -47,19 +29,23 @@ export async function POST(req: NextRequest) {
     const res = NextResponse.json({
       token: session.access_token,
       user: {
-        id: profile.id,
-        full_name: profile.full_name ?? '',
-        email: user.email ?? '',
-        phone: profile.phone,
-        role: profile.role,
+        id:            profile.id,
+        full_name:     profile.full_name ?? '',
+        email:         user.email       ?? '',
+        phone:         profile.phone,
+        role:          profile.role,
         language_pref: profile.language_pref,
-        avatar_url: profile.avatar_url,
+        avatar_url:    profile.avatar_url,
       },
     })
 
-    // Apply any refreshed token cookies to the response
-    pendingCookies.forEach(({ name, value, options }) => {
-      res.cookies.set(name, value, options as Parameters<typeof res.cookies.set>[2])
+    // Renew the indicator — keeps proxy happy even as Supabase tokens rotate
+    res.cookies.set('loka-session', '1', {
+      httpOnly: true,
+      secure:   process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge:   60 * 60 * 24 * 7,
+      path:     '/',
     })
 
     return res
