@@ -1,5 +1,9 @@
 import type { Metadata, Viewport } from 'next'
 import { Syne, DM_Sans, DM_Mono } from 'next/font/google'
+// Note: Double check the spelling of this file path in your actual folder!
+import { Suspense } from 'react'
+import { RouteProgressBar } from '@/components/ui/RouteProgessBar'
+
 import './globals.css'
 
 const syne = Syne({
@@ -46,7 +50,12 @@ export default function RootLayout({
       lang="en"
       className={`${syne.variable} ${dmSans.variable} ${dmMono.variable}`}
     >
-      <body>{children}</body>
+      <body>
+        {/* We actually render the progress bar component here! */}
+         <Suspense fallback={null}>
+          <RouteProgressBar />
+        </Suspense>        {children}
+      </body>
     </html>
   )
 }

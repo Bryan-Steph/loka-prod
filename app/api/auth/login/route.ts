@@ -79,8 +79,8 @@ export async function POST(req: NextRequest) {
     })
 
     // Session presence indicator for proxy.ts edge check
-    res.cookies.set('Loka-session', '1', {
-      httpOnly: true,
+res.cookies.set('loka-session', '1', {
+        httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 7,

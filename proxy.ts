@@ -1,33 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 // ── NOTE ON ROUTE GROUPS ────────────────────────────────────────────────────
-// app/(buyer)/feed/page.tsx  → real URL: /feed     (NOT /buyer/feed)
-// app/(buyer)/chat/page.tsx  → real URL: /chat     (NOT /buyer/chat)
-// app/(buyer)/profile/page.tsx → real URL: /profile
+// app/(buyer)/feed/page.tsx      → real URL: /feed     (NOT /buyer/feed)
+// app/(buyer)/chat/page.tsx      → real URL: /chat     (NOT /buyer/chat)
+// app/(buyer)/profile/page.tsx   → real URL: /profile
 // app/(onboarding)/shop/page.tsx → real URL: /shop
 // Vendor routes stay at /vendor/* (no route group, so URL matches)
 // ───────────────────────────────────────────────────────────────────────────
+//
+// SESSION COOKIE — single source of truth: 'loka-session' (all lowercase).
+// Set by:     /api/auth/login, /api/auth/refresh (on success)
+// Cleared by: /api/auth/logout, /api/auth/refresh (on 401)
+// All three routes MUST use this exact casing. Do not reintroduce 'Loka-session'.
 
 export default function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
-// Accept both casings — 'Loka-session' is what the current login route sets
-const hasSession =
-  request.cookies.has('loka-session') || request.cookies.has('Loka-session')
+  const hasSession = request.cookies.has('loka-session')
 
-  // ── Routes that require a session ───────────────────────────────────────
   const isProtected =
-    // Vendor portal
     pathname.startsWith('/vendor') ||
-    // Buyer pages (route group strips the (buyer) prefix)
     pathname === '/feed' ||
     pathname.startsWith('/chat') ||
     pathname === '/profile' ||
     pathname === '/notifications' ||
     pathname === '/settings' ||
     pathname === '/wishlist' ||
-    // Vendor onboarding steps (route group strips (onboarding) prefix)
     pathname === '/account' ||
-    pathname === '/shop' ||        // onboarding step 2 (NOT /shop/:id which is public)
+    pathname === '/shop' ||
     pathname === '/location' ||
     pathname === '/identity'
 
@@ -38,7 +37,6 @@ const hasSession =
     return NextResponse.redirect(url)
   }
 
-  // ── Admin routes ─────────────────────────────────────────────────────────
   if (
     pathname.startsWith('/admin') &&
     !pathname.startsWith('/admin/login') &&
@@ -49,7 +47,6 @@ const hasSession =
     return NextResponse.redirect(url)
   }
 
-  // ── Redirect authenticated users away from auth pages ────────────────────
   const authPages = ['/login', '/register', '/register/buyer', '/register/vendor', '/sign-in']
   if (authPages.some(p => pathname === p) && hasSession) {
     const url = request.nextUrl.clone()
