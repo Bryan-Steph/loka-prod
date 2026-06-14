@@ -1,45 +1,107 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import {
-  CheckCircle2, ImageIcon, Info, Search, BadgeCheck, ShieldCheck,
+  Video, CheckCircle2, Info, Search,
+  BadgeCheck, ShieldCheck, Upload, Loader2, AlertCircle,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { OnboardingLayout } from '@/components/onboarding/OnboardingLayout'
-import { OnboardingPhotoTip } from '@/components/onboarding/OnboardingPhotoTip'
-import { ImageUpload } from '@/components/ui/ImageUpload'
 
 const NEXT_STEPS = [
-  { icon: ShieldCheck, label: 'ID submitted for review', done: false },
-  { icon: Search,      label: 'Loka admin verifies (24–48 hours)', done: false },
-  { icon: BadgeCheck,  label: 'Verified badge added to your shop', done: false },
+  { icon: Upload,     label: 'Video submitted for review' },
+  { icon: Search,     label: 'LOKA admin verifies (24–48 hours)' },
+  { icon: BadgeCheck, label: 'Verified badge added to your shop' },
 ]
+
+type UploadState = 'idle' | 'uploading' | 'done' | 'error'
 
 export default function IdentityStepPage() {
   const router = useRouter()
-  const [frontUrl, setFrontUrl] = useState<string | null>(null)
-  const [backUrl, setBackUrl]   = useState<string | null>(null)
-  const [submitting, setSubmitting] = useState(false)
-  const [error, setError]           = useState('')
-  const canSubmit = !!frontUrl && !!backUrl && !submitting
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  const [videoUrl, setVideoUrl]         = useState<string | null>(null)
+  const [uploadState, setUploadState]   = useState<UploadState>('idle')
+  const [progress, setProgress]         = useState(0)
+  const [uploadError, setUploadError]   = useState('')
+  const [submitting, setSubmitting]     = useState(false)
+  const [submitError, setSubmitError]   = useState('')
+
+  const canSubmit = !!videoUrl && !submitting
+
+  const handleFileSelect = async (file: File) => {
+    // Max 50 MB
+    if (file.size > 50 * 1024 * 1024) {
+      setUploadError('Video must be under 50 MB')
+      setUploadState('error')
+      return
+    }
+
+    setUploadState('uploading')
+    setProgress(0)
+    setUploadError('')
+
+    try {
+      const sigRes = await fetch(
+        `/api/products/cloudinary-signature?folder=loka/vendor_videos&resourceType=video`,
+      )
+      if (!sigRes.ok) throw new Error('Could not get upload token')
+      const sig = await sigRes.json()
+
+      const form = new FormData()
+      form.append('file',         file)
+      form.append('api_key',      sig.apiKey)
+      form.append('timestamp',    String(sig.timestamp))
+      form.append('signature',    sig.signature)
+      form.append('folder',       sig.folder)
+      form.append('resource_type','video')
+
+      await new Promise<void>((resolve, reject) => {
+        const xhr = new XMLHttpRequest()
+        xhr.open('POST', `https://api.cloudinary.com/v1_1/${sig.cloudName}/video/upload`)
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable) setProgress(Math.round((e.loaded / e.total) * 100))
+        }
+        xhr.onload = () => {
+          if (xhr.status === 200) {
+            const data = JSON.parse(xhr.responseText)
+            setVideoUrl(data.secure_url)
+            setUploadState('done')
+            setProgress(100)
+            resolve()
+          } else {
+            reject(new Error('Upload failed'))
+          }
+        }
+        xhr.onerror = () => reject(new Error('Network error'))
+        xhr.send(form)
+      })
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Upload failed'
+      setUploadError(msg)
+      setUploadState('error')
+    }
+  }
 
   const handleSubmit = async () => {
     if (!canSubmit) return
-    setSubmitting(true); setError('')
+    setSubmitting(true)
+    setSubmitError('')
+
     try {
       const res = await fetch('/api/vendors/identity', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ front_url: frontUrl, back_url: backUrl }),
+        body: JSON.stringify({ video_url: videoUrl }),
       })
       if (!res.ok) {
         const d = await res.json()
         throw new Error(d.error ?? 'Submission failed')
       }
-router.push('/vendor/dashboard')
+      router.push('/vendor/dashboard')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong')
+      setSubmitError(err instanceof Error ? err.message : 'Something went wrong')
       setSubmitting(false)
     }
   }
@@ -75,89 +137,128 @@ router.push('/vendor/dashboard')
     >
       <div className="px-4 pt-4">
         <h2 className="font-heading text-[22px] text-foreground">
-          Upload Your National ID
+          Record a 30-Second Verification Video
         </h2>
         <p className="mt-1 text-[13px] text-muted-foreground">
-          We verify all vendors to protect buyers from fraud. Your ID is
-          encrypted and deleted after review.
+          Stand in your shop or market shed, show your face and your surroundings clearly.
+          This proves you are a real vendor operating from a real location.
         </p>
       </div>
 
-      <div className="m-4 flex gap-2">
-        {/* Front */}
-        <div className="flex-1">
-          <p className="mb-1.5 text-center font-mono text-[9px] uppercase text-primary">Front</p>
-          {frontUrl ? (
-            <div className="relative flex h-[100px] flex-1 flex-col items-center justify-center gap-1.5 rounded-2xl border border-success bg-success/10">
-              <CheckCircle2 size={28} className="text-success" />
-              <span className="text-xs text-success">Uploaded</span>
-              <button
-                type="button"
-                onClick={() => setFrontUrl(null)}
-                className="absolute right-2 top-2 font-mono text-[9px] text-muted-foreground underline"
-              >
-                replace
-              </button>
-            </div>
-          ) : (
-            <ImageUpload
-              folder="Loka/identity_docs"
-              accept="image/jpeg,image/png,application/pdf"
-              maxSizeMB={5}
-              resourceType="auto"
-              onUpload={setFrontUrl}
-              onError={setError}
-            />
-          )}
-        </div>
+      {/* Video upload area */}
+      <div className="m-4">
+        <input
+          ref={inputRef}
+          type="file"
+          accept="video/mp4,video/quicktime,video/webm,video/*"
+          className="sr-only"
+          onChange={(e) => {
+            const f = e.target.files?.[0]
+            if (f) handleFileSelect(f)
+          }}
+        />
 
-        {/* Back */}
-        <div className="flex-1">
-          <p className="mb-1.5 text-center font-mono text-[9px] uppercase text-primary">Back</p>
-          {backUrl ? (
-            <div className="relative flex h-[100px] flex-1 flex-col items-center justify-center gap-1.5 rounded-2xl border border-success bg-success/10">
-              <CheckCircle2 size={28} className="text-success" />
-              <span className="text-xs text-success">Uploaded</span>
-              <button
-                type="button"
-                onClick={() => setBackUrl(null)}
-                className="absolute right-2 top-2 font-mono text-[9px] text-muted-foreground underline"
-              >
-                replace
-              </button>
-            </div>
-          ) : (
-            <ImageUpload
-              folder="Loka/identity_docs"
-              accept="image/jpeg,image/png,application/pdf"
-              maxSizeMB={5}
-              resourceType="auto"
-              onUpload={setBackUrl}
-              onError={setError}
+        {uploadState === 'done' && videoUrl ? (
+          <div className="flex flex-col items-center gap-3 rounded-2xl border border-success bg-success/10 p-5">
+            <CheckCircle2 size={36} className="text-success" />
+            <p className="font-syne text-[15px] font-semibold text-success">Video uploaded</p>
+            <button
+              type="button"
+              onClick={() => { setVideoUrl(null); setUploadState('idle'); if (inputRef.current) inputRef.current.value = '' }}
+              className="font-mono text-[11px] text-muted-foreground underline"
+            >
+              Replace video
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            disabled={uploadState === 'uploading'}
+            onClick={() => inputRef.current?.click()}
+            className={cn(
+              'flex h-[140px] w-full flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed transition-colors',
+              uploadState === 'uploading' && 'border-primary bg-primary/5',
+              uploadState === 'error'     && 'border-error bg-error/10',
+              uploadState === 'idle'      && 'border-surface-3 bg-surface-2',
+            )}
+          >
+            {uploadState === 'uploading' ? (
+              <>
+                <Loader2 size={32} className="animate-spin text-primary" />
+                <p className="font-mono text-[13px] text-primary">Uploading... {progress}%</p>
+              </>
+            ) : uploadState === 'error' ? (
+              <>
+                <AlertCircle size={32} className="text-error" />
+                <p className="text-[13px] text-error">{uploadError}</p>
+                <p className="font-mono text-[11px] text-muted-foreground">Tap to try again</p>
+              </>
+            ) : (
+              <>
+                <Video size={32} className="text-muted-foreground" />
+                <div className="text-center">
+                  <p className="text-[13px] font-semibold text-foreground">Tap to select video</p>
+                  <p className="mt-0.5 font-mono text-[10px] text-muted-foreground">
+                    MP4 · MOV · WebM · Max 50 MB · Max 30 seconds
+                  </p>
+                </div>
+              </>
+            )}
+          </button>
+        )}
+
+        {uploadState === 'uploading' && (
+          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-surface-3">
+            <div
+              className="h-full rounded-full bg-primary transition-all duration-200"
+              style={{ width: `${progress}%` }}
             />
-          )}
+          </div>
+        )}
+      </div>
+
+      {/* What to show in the video */}
+      <div className="mx-4 rounded-2xl border border-surface-3 bg-surface-1 p-4">
+        <div className="mb-3 flex items-center gap-2">
+          <Video size={16} className="text-primary" />
+          <h3 className="font-heading text-sm font-semibold text-foreground">
+            What your video must show
+          </h3>
+        </div>
+        <ul className="space-y-2">
+          {[
+            'Your face — look directly at the camera',
+            'Your shop, stall, or market shed clearly',
+            'Your products or stock visible in the background',
+            'Speak your shop name aloud (e.g. "This is Mama Agnes Electronics")',
+          ].map((tip) => (
+            <li key={tip} className="flex items-start gap-2 text-xs text-muted-foreground">
+              <span className="mt-0.5 text-primary">✓</span>
+              {tip}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="mx-4 mt-4 rounded-xl border-l-[3px] border-primary bg-surface-2 p-3.5">
+        <div className="flex gap-3">
+          <ShieldCheck size={20} className="shrink-0 text-primary" />
+          <div>
+            <p className="text-[13px] font-semibold text-foreground">End-to-end encrypted</p>
+            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+              Only LOKA admins can access your verification video. It is permanently deleted
+              within 48 hours of review, regardless of outcome.
+            </p>
+          </div>
         </div>
       </div>
 
-      <div className="flex items-center justify-center gap-1.5">
-        <Info size={14} className="text-muted-foreground" />
-        <span className="font-mono text-[10px] text-muted-foreground">
-          JPG, PNG or PDF · Max 5MB per file
-        </span>
-      </div>
-
-      {error && (
-        <p className="mx-4 mt-2 text-center text-xs text-error">{error}</p>
+      {submitError && (
+        <p className="mx-4 mt-3 text-center text-xs text-error">{submitError}</p>
       )}
 
-      <div className="m-4">
-        <OnboardingPhotoTip />
-      </div>
-
-      <div className="mx-4 mb-4">
-        <p className="mb-3 font-mono text-[10px] uppercase text-primary">
-          What happens next?
-        </p>
+      <div className="mx-4 my-4">
+        <p className="mb-3 font-mono text-[10px] uppercase text-primary">What happens next?</p>
         <ol className="space-y-3">
           {NEXT_STEPS.map((s, i) => {
             const Icon = s.icon

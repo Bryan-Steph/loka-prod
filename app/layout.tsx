@@ -1,34 +1,8 @@
 import type { Metadata, Viewport } from 'next'
-import { Syne, DM_Sans, DM_Mono } from 'next/font/google'
-// Note: Double check the spelling of this file path in your actual folder!
-import { Suspense } from 'react'
-import { RouteProgressBar } from '@/components/ui/RouteProgessBar'
-
 import './globals.css'
 
-const syne = Syne({
-  subsets: ['latin'],
-  variable: '--font-syne',
-  weight: ['400', '600', '700', '800'],
-  display: 'swap',
-})
-
-const dmSans = DM_Sans({
-  subsets: ['latin'],
-  variable: '--font-dm-sans',
-  weight: ['400', '500', '600'],
-  display: 'swap',
-})
-
-const dmMono = DM_Mono({
-  subsets: ['latin'],
-  variable: '--font-dm-mono',
-  weight: ['400', '500'],
-  display: 'swap',
-})
-
 export const metadata: Metadata = {
-  title: 'Loka — Find it. Bargain it. Get it.',
+  title: 'LOKA — Find it. Bargain it. Get it.',
   description: "Bamenda's digital market. Verified vendors, safe bargaining, real pickup.",
   manifest: '/manifest.json',
 }
@@ -40,22 +14,18 @@ export const viewport: Viewport = {
   maximumScale: 1,
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html
-      lang="en"
-      className={`${syne.variable} ${dmSans.variable} ${dmMono.variable}`}
-    >
-      <body>
-        {/* We actually render the progress bar component here! */}
-         <Suspense fallback={null}>
-          <RouteProgressBar />
-        </Suspense>        {children}
-      </body>
+    <html lang="en">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body>{children}</body>
     </html>
   )
 }

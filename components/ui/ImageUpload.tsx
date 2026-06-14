@@ -5,9 +5,9 @@ import { Upload, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export type ImageUploadFolder =
-  | 'Loka/products'
-  | 'Loka/identity_docs'
-  | 'Loka/shop_avatars'
+  | 'loka/products'
+  | 'loka/identity_docs'
+  | 'loka/shop_avatars'
 
 type UploadState = 'idle' | 'uploading' | 'done' | 'error'
 

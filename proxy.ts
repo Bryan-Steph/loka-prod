@@ -11,7 +11,7 @@ import { NextRequest, NextResponse } from 'next/server'
 // SESSION COOKIE — single source of truth: 'loka-session' (all lowercase).
 // Set by:     /api/auth/login, /api/auth/refresh (on success)
 // Cleared by: /api/auth/logout, /api/auth/refresh (on 401)
-// All three routes MUST use this exact casing. Do not reintroduce 'Loka-session'.
+// All three routes MUST use this exact casing. Do not reintroduce 'loka-session'.
 
 export default function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl

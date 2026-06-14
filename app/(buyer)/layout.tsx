@@ -1,6 +1,10 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { adminSupabase } from '@/lib/supabase/admin'
+import { createAdminSupabaseClient } from '@/lib/supabase/admin'
+
+// Prevents Turbopack from prefetching this layout during build —
+// it requires request-time cookies and causes a timing crash otherwise.
+export const dynamic = 'force-dynamic'
 
 export default async function BuyerLayout({
   children,
@@ -9,21 +13,21 @@ export default async function BuyerLayout({
 }) {
   const supabase = await createClient()
   const { data: { user }, error } = await supabase.auth.getUser()
+  if (error || !user) redirect('/login')
 
-  if (error || !user) {
-    redirect('/login')
-  }
-
-  // Role check — vendor users cannot access buyer routes
-  const { data: profile } = await adminSupabase
+  const admin = createAdminSupabaseClient()
+  const { data: profile } = await admin
     .from('users')
     .select('role')
     .eq('id', user.id)
     .single()
 
-  if (!profile || profile.role !== 'buyer') {
-    redirect('/login')
-  }
+  if (!profile) redirect('/login')
+
+  // Vendor clicking the chat icon gets sent to their own area, not a blank error
+  if (profile.role === 'vendor') redirect('/vendor/dashboard')
+
+  if (profile.role !== 'buyer') redirect('/login')
 
   return <>{children}</>
 }

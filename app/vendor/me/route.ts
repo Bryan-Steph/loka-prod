@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { adminSupabase } from '@/lib/supabase/admin'
+import { createAdminSupabaseClient } from '@/lib/supabase/admin'
 
 export async function GET() {
   try {
@@ -8,6 +8,7 @@ export async function GET() {
     const { data: { user }, error } = await supabase.auth.getUser()
     if (error || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+    const adminSupabase = createAdminSupabaseClient()
     const { data: vendor, error: vendorError } = await adminSupabase
       .from('vendors')
       .select(`
@@ -41,12 +42,12 @@ export async function PATCH(req: NextRequest) {
       'shop_name', 'shop_description', 'shop_avatar_url',
       'category_id', 'latitude', 'longitude', 'address_text',
     ] as const
-
     const patch: Record<string, unknown> = {}
     for (const key of ALLOWED) {
       if (body[key] !== undefined) patch[key] = body[key]
     }
 
+    const adminSupabase = createAdminSupabaseClient()
     const { data: vendor, error: updateError } = await adminSupabase
       .from('vendors')
       .update(patch)

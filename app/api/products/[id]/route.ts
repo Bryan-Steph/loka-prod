@@ -1,16 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 import { createAdminSupabaseClient } from '@/lib/supabase/admin'
 
 async function assertOwnership(productId: string, userId: string) {
   const admin = createAdminSupabaseClient()
   const { data: vendor } = await admin
-    .from('vendors').select('id').eq('user_id', userId).single()
+    .from('vendors')
+    .select('id')
+    .eq('user_id', userId)
+    .single()
   if (!vendor) return null
 
   const { data: product } = await admin
-    .from('products').select('id')
-    .eq('id', productId).eq('vendor_id', vendor.id).single()
+    .from('products')
+    .select('id')
+    .eq('id', productId)
+    .eq('vendor_id', vendor.id)
+    .single()
 
   return product ? vendor : null
 }
@@ -24,11 +30,9 @@ export async function GET(
 
   const { data: product, error } = await admin
     .from('products')
-    .select(`
-      *,
-      vendors(id, shop_name, shop_avatar_url, verification_status, address_text, latitude, longitude),
-      categories(id, name_en, icon_emoji)
-    `)
+    .select(
+      '*, vendors(id, shop_name, shop_avatar_url, verification_status, address_text, latitude, longitude), categories(id, name_en)',
+    )
     .eq('id', id)
     .eq('is_published', true)
     .is('deleted_at', null)
@@ -38,8 +42,9 @@ export async function GET(
     return NextResponse.json({ error: 'Product not found' }, { status: 404 })
   }
 
-  // Increment view count — fire and forget
-  admin.from('products')
+  // increment view count — fire and forget
+  admin
+    .from('products')
     .update({ view_count: (product.view_count ?? 0) + 1 })
     .eq('id', id)
     .then(() => {})
@@ -52,7 +57,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params
-  const supabase = await createSupabaseServerClient()
+  const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -62,7 +67,7 @@ export async function PATCH(
   const body = await req.json()
   const PATCHABLE = [
     'name_en', 'description_en', 'price', 'condition', 'category_id',
-    'photo_urls', 'bargaining_allowed', 'min_bargain_price', 'stock_status', 'is_published',
+    'photo_urls', 'bargaining_allowed', 'min_bargain_price', 'stock_status',
   ] as const
 
   const updates: Record<string, unknown> = {}
@@ -75,7 +80,11 @@ export async function PATCH(
 
   const admin = createAdminSupabaseClient()
   const { data: product, error } = await admin
-    .from('products').update(updates).eq('id', id).select().single()
+    .from('products')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ product })
@@ -86,7 +95,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params
-  const supabase = await createSupabaseServerClient()
+  const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -94,7 +103,6 @@ export async function DELETE(
   if (!owned) return NextResponse.json({ error: 'Not found or forbidden' }, { status: 404 })
 
   const admin = createAdminSupabaseClient()
-  // Soft delete — set deleted_at, never hard DELETE
   const { error } = await admin
     .from('products')
     .update({ deleted_at: new Date().toISOString() })

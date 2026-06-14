@@ -1,24 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 import { createAdminSupabaseClient } from '@/lib/supabase/admin'
 
-//app/api/vendors/identity/route.ts
-
 export async function POST(req: NextRequest) {
-  const supabase = await createSupabaseServerClient()
+  const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { front_url, back_url } = await req.json()
-  if (!front_url || !back_url) {
-    return NextResponse.json(
-      { error: 'Both front and back ID images are required' },
-      { status: 400 },
-    )
+  const { video_url } = await req.json()
+  if (!video_url) {
+    return NextResponse.json({ error: 'Verification video is required' }, { status: 400 })
   }
 
   const admin = createAdminSupabaseClient()
-
   const { data: vendor } = await admin
     .from('vendors')
     .select('id')
@@ -26,10 +20,7 @@ export async function POST(req: NextRequest) {
     .single()
 
   if (!vendor) {
-    return NextResponse.json(
-      { error: 'Complete shop setup first' },
-      { status: 404 },
-    )
+    return NextResponse.json({ error: 'Complete shop setup first' }, { status: 404 })
   }
 
   // Upsert — allow resubmission
@@ -37,12 +28,20 @@ export async function POST(req: NextRequest) {
     .from('verification_documents')
     .select('id')
     .eq('vendor_id', vendor.id)
-    .single()
+    .maybeSingle()
+
+  const payload = {
+    vendor_id:     vendor.id,
+    document_type: 'verification_video',
+    front_url:     video_url,   // reusing front_url column for the video URL
+    back_url:      null,
+    status:        'pending',
+  }
 
   if (existing) {
     const { data, error } = await admin
       .from('verification_documents')
-      .update({ front_url, back_url, status: 'pending' })
+      .update({ front_url: video_url, status: 'pending' })
       .eq('vendor_id', vendor.id)
       .select()
       .single()
@@ -52,13 +51,7 @@ export async function POST(req: NextRequest) {
 
   const { data, error } = await admin
     .from('verification_documents')
-    .insert({
-      vendor_id:     vendor.id,
-      document_type: 'national_id',
-      front_url,
-      back_url,
-      status:        'pending',
-    })
+    .insert(payload)
     .select()
     .single()
 

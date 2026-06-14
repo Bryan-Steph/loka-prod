@@ -14,7 +14,7 @@ import {
   AlertTriangle,
   Loader2,
 } from 'lucide-react'
-import { ImagePlaceholder } from '@/components/ui/placeholders'
+import { MapPlaceholder } from '@/components/ui/placeholders'
 import { cn } from '@/lib/utils'
 
 const PICKUP_CODE = ['4', '8', '2', '9', '1', '7']
@@ -90,7 +90,7 @@ export default function PayPage() {
         {step === 1 && (
           <div className="space-y-4">
             <div className="flex items-center gap-3 rounded-xl border border-surface-3 bg-surface-1 p-3">
-              <ImagePlaceholder className="h-12 w-12 shrink-0 rounded-lg" iconSize={18} />
+              <MapPlaceholder className="h-12 w-12 shrink-0 rounded-lg"  />
               <div className="min-w-0">
                 <p className="line-clamp-2 text-[13px] text-foreground">
                   Samsung Galaxy A32 (Unlocked)
@@ -261,7 +261,7 @@ export default function PayPage() {
             </p>
 
             <div className="flex items-center gap-3 rounded-xl border border-surface-3 bg-surface-1 p-3">
-              <ImagePlaceholder className="h-10 w-10 shrink-0 rounded-lg" iconSize={16} />
+              <MapPlaceholder className="h-10 w-10 shrink-0 rounded-lg" />
               <div className="min-w-0">
                 <p className="line-clamp-1 text-[12px] text-foreground">
                   Samsung Galaxy A32 (Unlocked)

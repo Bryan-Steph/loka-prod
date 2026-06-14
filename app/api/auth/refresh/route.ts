@@ -1,7 +1,7 @@
 //app/api/auth/refresh/route.ts
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { adminSupabase } from '@/lib/supabase/admin'
+import { createAdminSupabaseClient } from '@/lib/supabase/admin'
 
 function clearSessionCookie(res: NextResponse) {
   res.cookies.set('loka-session', '', {
@@ -32,7 +32,7 @@ export async function POST() {
       return res
     }
 
-    const { data: profile, error: profileError } = await adminSupabase
+    const { data: profile, error: profileError } = await createAdminSupabaseClient()
       .from('users')
       .select('id, full_name, phone, role, language_pref, avatar_url')
       .eq('id', user.id)

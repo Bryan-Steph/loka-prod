@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { Clock, MapPin } from 'lucide-react'
 import type { Product } from '@/lib/data'
 import { formatXAF } from '@/lib/data'
-import { ImagePlaceholder } from '@/components/ui/placeholders'
+import { MapPlaceholder } from '@/components/ui/placeholders'
 import { VerifiedBadge } from '@/components/ui/verified-badge'
 
 function Tag({
@@ -34,7 +34,7 @@ export function ProductCard({ product }: { product: Product }) {
       className="block overflow-hidden rounded-2xl border border-surface-3 bg-surface-1 transition-colors hover:border-primary/50"
     >
       <div className="relative">
-        <ImagePlaceholder className="h-[100px] w-full" />
+        <MapPlaceholder className="h-[100px] w-full" />
         {product.verified && (
           <div className="absolute right-2 top-2">
             <Tag tone="success">VERIFIED</Tag>
@@ -73,7 +73,7 @@ export function ProductListCard({ product }: { product: Product }) {
       href={`/products/${product.id}`}
       className="flex gap-3 rounded-2xl border border-surface-3 bg-surface-1 p-3.5 transition-colors hover:border-primary/50"
     >
-      <ImagePlaceholder className="h-20 w-20 shrink-0 rounded-xl" iconSize={22} />
+      <MapPlaceholder className="h-20 w-20 shrink-0 rounded-xl" />
       <div className="min-w-0 flex-1">
         <h3 className="line-clamp-2 text-[13px] font-semibold text-foreground">
           {product.name}

@@ -6,22 +6,26 @@ import { Store, Tag, Clock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { OnboardingLayout } from '@/components/onboarding/OnboardingLayout'
 
-interface Category { id: string; name_en: string; name_fr: string | null; icon_emoji: string | null; sort_order: number }
-
+interface Category {
+  id: string
+  name_en: string
+  name_fr?: string
+  icon_emoji?: string
+}
 
 const EXPERIENCE = ['< 1 year', '1–3 years', '3–5 years', '5+ years']
 
 export default function ShopStepPage() {
   const router = useRouter()
   const [categories, setCategories] = useState<Category[]>([])
-  const [shopName, setShopName]         = useState('')
-  const [categoryId, setCategoryId]     = useState<string | null>(null)
-  const [desc, setDesc]                 = useState('')
-  const [experience, setExperience]     = useState('1–3 years')
-  const [opensAt, setOpensAt]           = useState('')
-  const [closesAt, setClosesAt]         = useState('')
-  const [saving, setSaving]             = useState(false)
-  const [error, setError]               = useState('')
+  const [shopName, setShopName]     = useState('')
+  const [categoryId, setCategoryId] = useState<string | null>(null)
+  const [desc, setDesc]             = useState('')
+  const [experience, setExperience] = useState('1–3 years')
+  const [opensAt, setOpensAt]       = useState('')
+  const [closesAt, setClosesAt]     = useState('')
+  const [saving, setSaving]         = useState(false)
+  const [error, setError]           = useState('')
 
   useEffect(() => {
     fetch('/api/products/categories')
@@ -68,12 +72,8 @@ export default function ShopStepPage() {
       }
 
       if (!res.ok) {
-      let msg = `Request failed (${res.status})`
-try {
-  const d = await res.json()
-  if (typeof d.error === 'string') msg = d.error
-} catch { /* empty response body — 405/500 from Next.js */ }
-throw new Error(msg)
+        const d = await res.json()
+        throw new Error(d.error ?? 'Failed to save shop info')
       }
       router.push('/location')
     } catch (err) {
@@ -111,16 +111,13 @@ throw new Error(msg)
       }
     >
       <div className="px-4 pt-4">
-        <h2 className="font-heading text-[22px] text-foreground">
-          Tell us about your shop
-        </h2>
+        <h2 className="font-heading text-[22px] text-foreground">Tell us about your shop</h2>
         <p className="mt-1 text-[13px] text-muted-foreground">
           This is what buyers will see on your public vendor profile.
         </p>
       </div>
 
       <div className="m-4 space-y-5 rounded-2xl border border-surface-3 bg-surface-1 p-4">
-        {/* Shop name */}
         <div>
           <label className="mb-1.5 block text-[13px] text-foreground">Shop Name</label>
           <div className="relative">
@@ -133,12 +130,8 @@ throw new Error(msg)
               className="h-12 w-full rounded-xl border border-surface-3 bg-surface-2 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
             />
           </div>
-          <p className="mt-1.5 font-mono text-[10px] text-muted-foreground">
-            Tip: Include your main product category in your name.
-          </p>
         </div>
 
-        {/* Category */}
         <div>
           <label className="mb-2 flex items-center gap-1.5 text-[13px] text-foreground">
             <Tag size={14} className="text-muted-foreground" />
@@ -166,7 +159,6 @@ throw new Error(msg)
           )}
         </div>
 
-        {/* Description */}
         <div>
           <label className="mb-1.5 block text-[13px] text-foreground">Shop Description</label>
           <textarea
@@ -176,12 +168,9 @@ throw new Error(msg)
             placeholder="What do you sell? What makes your shop special?"
             className="h-[100px] w-full resize-none rounded-xl border border-surface-3 bg-surface-2 p-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
           />
-          <p className="mt-1 text-right font-mono text-[10px] text-muted-foreground">
-            {desc.length} / 200
-          </p>
+          <p className="mt-1 text-right font-mono text-[10px] text-muted-foreground">{desc.length} / 200</p>
         </div>
 
-        {/* Experience */}
         <div>
           <p className="mb-2 text-[13px] text-foreground">How long have you been trading?</p>
           <div className="flex flex-wrap gap-2">
@@ -202,7 +191,6 @@ throw new Error(msg)
           </div>
         </div>
 
-        {/* Operating hours */}
         <div>
           <div className="mb-2 flex items-center justify-between">
             <p className="text-[13px] text-foreground">Operating Hours</p>

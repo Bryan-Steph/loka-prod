@@ -102,7 +102,7 @@ export default function VendorProfilePage() {
             </div>
 
             <ImageUpload
-              folder="Loka/shop_avatars"
+              folder="loka/shop_avatars"
               onUpload={handleAvatarUpload}
               onError={setUploadError}
               className="absolute -bottom-0.5 -right-0.5 h-8 w-8 rounded-full"

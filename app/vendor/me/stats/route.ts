@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { adminSupabase } from '@/lib/supabase/admin'
+import { createAdminSupabaseClient } from '@/lib/supabase/admin'
 
 export async function GET() {
   try {
@@ -8,13 +8,14 @@ export async function GET() {
     const { data: { user }, error } = await supabase.auth.getUser()
     if (error || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const { data: vendor } = await adminSupabase
+    const adminSupabase = await createAdminSupabaseClient()
+    const { data: vendor, error: vendorError } = await adminSupabase
       .from('vendors')
       .select('id')
       .eq('user_id', user.id)
       .single()
 
-    if (!vendor) return NextResponse.json({ error: 'Vendor not found' }, { status: 404 })
+    if (vendorError || !vendor) return NextResponse.json({ error: 'Vendor not found' }, { status: 404 })
 
     const [productsRes, viewsRes, enquiriesRes] = await Promise.all([
       adminSupabase

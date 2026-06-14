@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
-import { adminSupabase } from '@/lib/supabase/admin'
+import { createAdminSupabaseClient } from '@/lib/supabase/admin'
 import { loginSchema } from '@/lib/validations/auth'
 import { checkRateLimit } from '@/lib/ratelimit'
 
@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid email or password.' }, { status: 401 })
     }
 
-    const { data: profile, error: profileError } = await adminSupabase
+    const { data: profile, error: profileError } = await createAdminSupabaseClient()
       .from('users')
       .select('id, full_name, phone, role, language_pref, avatar_url')
       .eq('id', data.user.id)

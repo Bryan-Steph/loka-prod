@@ -94,6 +94,9 @@
   --ring:                  #f59e0b;
 
   --radius: 0.625rem;
+    --font-syne: 'Syne', sans-serif;
+  --font-dm-sans: 'DM Sans', sans-serif;
+  --font-dm-mono: 'DM Mono', monospace;
 }
 
 @layer base {
