@@ -76,7 +76,7 @@ export default function WishlistPage() {
             ? Array.from({ length: 4 }).map((_, i) => <ProductCardSkeleton key={i} />)
             : items.map(p => (
                 <div key={p.id} className="relative">
-                  <ProductCard product={p} />
+                  <ProductCard product={p as any} />
                   <button
                     onClick={() => handleRemove(p.id)}
                     className="absolute right-2 top-2 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-surface-1/90"

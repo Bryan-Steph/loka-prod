@@ -1,5 +1,15 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
+import { Suspense } from 'react'
+import { RouteProgressBar } from '@/components/ui/RouteProgessBar'
+
+/**
+ * Temporary no-op LanguageProvider to satisfy usage in RootLayout.
+ * Replace this with the real provider implementation or import it from its module.
+ */
+function LanguageProvider({ children }: { children: React.ReactNode }) {
+  return <>{children}</>
+}
 
 export const metadata: Metadata = {
   title: 'LOKA — Find it. Bargain it. Get it.',
@@ -25,7 +35,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
         />
       </head>
-      <body>{children}</body>
+   <body>
+  <Suspense fallback={null}><RouteProgressBar /></Suspense>
+  <LanguageProvider>
+    {children}
+  </LanguageProvider>
+</body>
     </html>
   )
 }

@@ -6,7 +6,7 @@ import Link from 'next/link'
 import {
   User, Bell, Settings, Heart,
   MessageSquare, LogOut, ChevronRight,
-  Mail, Phone, ShieldCheck,
+  Mail, Phone, ShieldCheck, Pencil,
 } from 'lucide-react'
 import { BottomNav } from '@/components/ui/bottom-nav'
 import { useAuth } from '@/hooks/useAuth'
@@ -75,8 +75,12 @@ export default function BuyerProfilePage() {
             }
           </div>
 
-          <p className="mt-3 font-syne text-[18px] font-bold text-foreground">{name}</p>
-
+          <div className="mt-3 flex items-center gap-2">
+            <p className="font-syne text-[18px] font-bold text-foreground">{name}</p>
+            <Link href="/settings" aria-label="Edit profile" className="text-muted-foreground">
+              <Pencil size={14} />
+            </Link>
+          </div>
           <div className="mt-2 flex flex-col items-center gap-1">
             <div className="flex items-center gap-1.5">
               <Mail size={12} className="text-muted-foreground" />

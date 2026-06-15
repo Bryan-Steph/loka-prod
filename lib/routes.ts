@@ -43,3 +43,17 @@ export const ROUTES = {
     notifications: '/vendor/notifications',
   },
 } as const
+
+// ── Route protection — single source of truth for proxy.ts AND useAuth.ts ──
+const PROTECTED_EXACT = [
+  '/vendor', '/feed', '/chat', '/profile', '/notifications',
+  '/settings', '/wishlist', '/account', '/shop', '/location', '/identity',
+]
+
+// Prefixes use a trailing slash so '/vendor/' does NOT match '/vendors/...'
+const PROTECTED_PREFIXES = ['/vendor/', '/chat/']
+
+export function isProtectedPath(pathname: string): boolean {
+  if (PROTECTED_EXACT.includes(pathname)) return true
+  return PROTECTED_PREFIXES.some((p) => pathname.startsWith(p))
+}

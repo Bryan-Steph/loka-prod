@@ -1,36 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { isProtectedPath } from '@/lib/routes'
 
-// ── NOTE ON ROUTE GROUPS ────────────────────────────────────────────────────
-// app/(buyer)/feed/page.tsx      → real URL: /feed     (NOT /buyer/feed)
-// app/(buyer)/chat/page.tsx      → real URL: /chat     (NOT /buyer/chat)
-// app/(buyer)/profile/page.tsx   → real URL: /profile
-// app/(onboarding)/shop/page.tsx → real URL: /shop
-// Vendor routes stay at /vendor/* (no route group, so URL matches)
-// ───────────────────────────────────────────────────────────────────────────
-//
 // SESSION COOKIE — single source of truth: 'loka-session' (all lowercase).
 // Set by:     /api/auth/login, /api/auth/refresh (on success)
 // Cleared by: /api/auth/logout, /api/auth/refresh (on 401)
-// All three routes MUST use this exact casing. Do not reintroduce 'loka-session'.
 
 export default function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
   const hasSession = request.cookies.has('loka-session')
 
-  const isProtected =
-    pathname.startsWith('/vendor') ||
-    pathname === '/feed' ||
-    pathname.startsWith('/chat') ||
-    pathname === '/profile' ||
-    pathname === '/notifications' ||
-    pathname === '/settings' ||
-    pathname === '/wishlist' ||
-    pathname === '/account' ||
-    pathname === '/shop' ||
-    pathname === '/location' ||
-    pathname === '/identity'
-
-  if (isProtected && !hasSession) {
+  if (isProtectedPath(pathname) && !hasSession) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     url.searchParams.set('next', pathname)

@@ -42,12 +42,8 @@ export async function GET(
     return NextResponse.json({ error: 'Product not found' }, { status: 404 })
   }
 
-  // increment view count — fire and forget
-  admin
-    .from('products')
-    .update({ view_count: (product.view_count ?? 0) + 1 })
-    .eq('id', id)
-    .then(() => {})
+  // Increment view count via Database RPC function atomically
+  await admin.rpc('increment_product_views', { p_id: id })
 
   return NextResponse.json({ product })
 }

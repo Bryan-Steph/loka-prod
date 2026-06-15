@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { useAuthStore, type AuthUser } from '@/store/authStore'
+import { isProtectedPath } from '@/lib/routes'
 
 let refreshPromise: Promise<void> | null = null
 
@@ -35,9 +36,10 @@ export function useAuth() {
       .then(async (res) => {
         if (!res.ok) {
           clearAuth()
-          // Don't redirect if already on /login — avoids a self-loop.
-          // 401 here is EXPECTED on /login when there's no session.
-          if (pathname !== '/login') {
+          // A 401 here is EXPECTED on any page when there's no session —
+          // including /register, /search, /products/[id], etc. Only force
+          // a redirect if the CURRENT page actually requires auth.
+          if (isProtectedPath(pathname)) {
             router.push('/login')
           }
           return
@@ -47,14 +49,14 @@ export function useAuth() {
           setAuth(data.token, data.user as AuthUser)
         } else {
           clearAuth()
-          if (pathname !== '/login') {
+          if (isProtectedPath(pathname)) {
             router.push('/login')
           }
         }
       })
       .catch(() => {
         clearAuth()
-        if (pathname !== '/login') {
+        if (isProtectedPath(pathname)) {
           router.push('/login')
         }
       })
@@ -113,13 +115,6 @@ export function useAuth() {
     return data
   }
 
-  // Logout is defensive: a hung /api/auth/logout request (slow mobile
-  // network, a rate-limit/Redis call without a fast fallback, etc.) must
-  // NEVER leave the user stuck on "Signing out...". The server call gets a
-  // hard 4-second cap; client state is cleared and the redirect fires
-  // regardless of the server outcome. If the server call times out, the
-  // httpOnly session cookie simply expires naturally (7-day maxAge) rather
-  // than being cleared immediately — acceptable for this stage.
   const logout = async () => {
     const controller = new AbortController()
     const timeout = window.setTimeout(() => controller.abort(), 4000)
@@ -138,8 +133,6 @@ export function useAuth() {
 
     clearAuth()
     router.push('/login')
-    // Bust the Router Cache so cached middleware redirects computed while
-    // authenticated (or unauthenticated) aren't reused after this transition.
     router.refresh()
   }
 

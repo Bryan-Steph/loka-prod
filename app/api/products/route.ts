@@ -6,14 +6,12 @@ import { createAdminSupabaseClient } from '@/lib/supabase/admin'
 const CreateProductSchema = z.object({
   name_en:            z.string().min(2, 'Name must be at least 2 characters').max(120),
   description_en:     z.string().max(500).optional().nullable(),
-  price:              z.number({ error: 'Price must be a number' }).int().positive({ message: 'Price must be positive' }),
+  price:              z.number().int().positive(),
   condition:          z.enum(['new', 'used', 'refurbished']),
-  // Relaxed — IDs come from our own DB, strict UUID check was rejecting valid values
-  category_id:        z.string().min(1).optional().nullable(),
-  photo_urls:         z.array(z.string().url()).min(1, 'At least one photo is required').max(5),
+  category_id:        z.string().optional().nullable(),   // ← no .uuid() — IDs come from our own DB
+  photo_urls:         z.array(z.string().url()).min(1, 'At least one photo required').max(5),
   bargaining_allowed: z.boolean().default(false),
   stock_status:       z.enum(['in_stock', 'out_of_stock']).default('in_stock'),
-  // min_bargain_price intentionally omitted — column does not exist in DB schema
 })
 
 export async function POST(req: NextRequest) {
@@ -34,13 +32,15 @@ export async function POST(req: NextRequest) {
 
   let body: unknown
   try { body = await req.json() }
-  catch { return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 }) }
+  catch { return NextResponse.json({ error: 'Invalid request body' }, { status: 400 }) }
 
   const parsed = CreateProductSchema.safeParse(body)
   if (!parsed.success) {
     const fieldErrors = parsed.error.flatten().fieldErrors
-    console.error('[POST /api/products] Zod validation failed:', JSON.stringify(fieldErrors))
-    return NextResponse.json({ error: fieldErrors, message: 'Validation failed' }, { status: 400 })
+    console.error('[POST /api/products] Validation failed:', JSON.stringify(fieldErrors))
+    // Return first field error as a plain string so the UI can display it directly
+    const firstError = Object.values(fieldErrors)[0]?.[0] ?? 'Validation failed'
+    return NextResponse.json({ error: firstError }, { status: 400 })
   }
 
   const {
@@ -51,26 +51,25 @@ export async function POST(req: NextRequest) {
   const { data: product, error } = await admin
     .from('products')
     .insert({
-      vendor_id:         vendor.id,
+      vendor_id:          vendor.id,
       name_en,
-      description_en:    description_en ?? null,
+      description_en:     description_en ?? null,
       price,
       condition,
-      category_id:       category_id ?? null,
+      category_id:        category_id ?? null,
       photo_urls,
       bargaining_allowed,
       stock_status,
-      is_published:      true,
-      view_count:        0,
+      is_published:       true,
+      view_count:         0,
     })
     .select()
     .single()
 
   if (error) {
-    console.error('[POST /api/products] DB error:', error.message, error.details)
+    console.error('[POST /api/products] DB error:', error.message)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
-
   return NextResponse.json({ product }, { status: 201 })
 }
 

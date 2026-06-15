@@ -137,7 +137,7 @@ export default function IdentityStepPage() {
     >
       <div className="px-4 pt-4">
         <h2 className="font-heading text-[22px] text-foreground">
-          Record a 30-Second Verification Video
+          Record a 10 to 30-Seconds Verification Video
         </h2>
         <p className="mt-1 text-[13px] text-muted-foreground">
           Stand in your shop or market shed, show your face and your surroundings clearly.

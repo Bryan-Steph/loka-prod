@@ -59,7 +59,7 @@ function VendorDashboardContent() {
           })
         }
       })
-  }, [])
+}, [params]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const displayName = vendorName ?? user?.full_name ?? '…'
   const isApproved = vendor?.verification_status === 'approved'
