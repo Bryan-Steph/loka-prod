@@ -6,8 +6,11 @@
 
 const BASE = 'https://live.fapshi.com'
 
-export const PAYMENT_SIMULATION_MODE = process.env.PAYMENT_SIMULATION_MODE === 'true'
-
+export const PAYMENT_SIMULATION_MODE =
+  process.env.PAYMENT_SIMULATION_MODE === 'true' ||
+  !process.env.FAPSHI_API_USER ||
+  !process.env.FAPSHI_API_KEY
+  
 function headers() {
   return {
     'Content-Type': 'application/json',

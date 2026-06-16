@@ -12,12 +12,49 @@ import { cn } from '@/lib/utils'
 import { useAuth } from '@/hooks/useAuth'
 import { VendorShell } from '@/components/vendor/VendorShell'
 import { VerificationBanner } from '@/components/vendor/VerificationBanner'
+import { PWAInstallButton } from '@/components/ui/PWAInstallButton'
+
 
 function greeting() {
   const h = new Date().getHours()
   if (h < 12) return 'Good morning'
   if (h < 17) return 'Good afternoon'
   return 'Good evening'
+}
+
+function FreeTrialCard({ vendorCreatedAt }: { vendorCreatedAt?: string }) {
+  const [daysLeft, setDaysLeft] = useState<number>(7)
+
+  useEffect(() => {
+    if (!vendorCreatedAt) return
+    const created   = new Date(vendorCreatedAt).getTime()
+    const trialEnd  = created + 7 * 24 * 60 * 60 * 1000
+    const remaining = Math.ceil((trialEnd - Date.now()) / (1000 * 60 * 60 * 24))
+    setDaysLeft(Math.max(0, remaining))
+  }, [vendorCreatedAt])
+
+  const expired = daysLeft === 0
+
+  return (
+    <Link
+      href="/vendor/subscription"
+      className={cn(
+        'mt-4 flex items-center gap-3 rounded-2xl border p-4 transition-colors',
+        expired ? 'border-error/40 bg-error/10' : 'border-primary/30 bg-primary/5',
+      )}
+    >
+      <CreditCard size={20} className={expired ? 'text-error' : 'text-primary'} />
+      <div className="flex-1">
+        <p className="text-[14px] font-semibold text-foreground">
+          {expired ? 'Free Trial Expired' : 'Free Trial Active'}
+        </p>
+        <p className={cn('font-mono text-[11px]', expired ? 'text-error' : 'text-muted-foreground')}>
+          {expired ? 'Subscribe to keep posting products' : `${daysLeft} day${daysLeft !== 1 ? 's' : ''} remaining`}
+        </p>
+      </div>
+      <ChevronRight size={16} className="text-muted-foreground" />
+    </Link>
+  )
 }
 
 interface Stats {
@@ -38,7 +75,7 @@ function VendorDashboardContent() {
   const [toast, setToast]           = useState(params.get('published') === '1')
   const [stats, setStats]           = useState<Stats | null>(null)
   const [vendorName, setVendorName] = useState<string | null>(null)
-  const [vendor, setVendor]         = useState<VendorInfo | null>(null)
+  const [vendor, setVendor] = useState<VendorInfo & { created_at?: string } | null>(null)
 
   useEffect(() => {
     fetch('/api/users/me')
@@ -56,6 +93,7 @@ function VendorDashboardContent() {
           setVendor({
             verification_status: d.vendor.verification_status ?? null,
             suspension_reason: d.vendor.suspension_reason ?? null,
+              created_at:          d.vendor.created_at ?? null,
           })
         }
       })
@@ -101,14 +139,12 @@ function VendorDashboardContent() {
         )}
 
         {/* Subscription placeholder — wired in Sprint 7 */}
-        <div className="mt-4 flex items-center gap-3 rounded-2xl border border-surface-3 bg-surface-1 p-4">
-          <CreditCard size={20} className="shrink-0 text-primary" />
-          <span className="text-[14px] text-foreground">Subscription</span>
-          <span className="ml-auto rounded-full bg-surface-3 px-2 py-0.5 font-mono text-[10px] text-muted-foreground">
-            Sprint 7
-          </span>
-          <ChevronRight size={16} className="text-muted-foreground" />
-        </div>
+     <FreeTrialCard vendorCreatedAt={vendor?.created_at} />
+
+     <div className="mt-3">
+  <PWAInstallButton />
+</div>
+
 
         {/* Stats */}
         <div className="no-scrollbar mt-4 flex gap-3 overflow-x-auto md:grid md:grid-cols-3">

@@ -78,8 +78,12 @@ export async function GET() {
 
   const admin = createAdminSupabaseClient()
 
-  const { data: profile } = await admin.from('users').select('role').eq('id', user.id).single()
-  const role = profile?.role === 'vendor' ? 'vendor' : 'buyer'
+const [profileRes, vendorCheckRes] = await Promise.all([
+  admin.from('users').select('role').eq('id', user.id).single(),
+  admin.from('vendors').select('id').eq('user_id', user.id).order('created_at', { ascending: false }).limit(1).maybeSingle(),
+])
+
+const role = vendorCheckRes.data ? 'vendor' : 'buyer'
 
   let query = admin
     .from('conversations')

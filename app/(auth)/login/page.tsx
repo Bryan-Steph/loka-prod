@@ -5,6 +5,9 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Mail, Lock, Eye, EyeOff, Loader2, AlertCircle, ArrowLeft } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
+import { getRoleRedirect } from '@/hooks/useAuth'   // add to imports at top
+
+
 
 function LoginForm() {
   const router = useRouter()
@@ -25,14 +28,8 @@ function LoginForm() {
     try {
       const user = await login(email, password)
       const next = searchParams.get('next')
-      if (next) {
-        router.push(next)
-      } else if (user.role === 'vendor') {
-        router.push('/vendor/dashboard')
-      } else {
-        router.push('/')
-      }
-         router.refresh()
+      router.push(getRoleRedirect(user.role, searchParams.get('next')))
+      router.refresh()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed.')
     } finally {

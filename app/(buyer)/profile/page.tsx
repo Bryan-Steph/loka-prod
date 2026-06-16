@@ -11,6 +11,8 @@ import {
 import { BottomNav } from '@/components/ui/bottom-nav'
 import { useAuth } from '@/hooks/useAuth'
 import { cn } from '@/lib/utils'
+import { PWAInstallButton } from '@/components/ui/PWAInstallButton'
+
 
 interface Profile {
   id: string
@@ -117,6 +119,10 @@ export default function BuyerProfilePage() {
             </Link>
           ))}
         </div>
+
+        <div className="px-4 pb-4">
+  <PWAInstallButton />
+</div>
 
         {/* Logout */}
         <button

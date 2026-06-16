@@ -36,13 +36,18 @@ export function ConversationInbox() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch('/api/conversations')
-      .then(r => r.json())
-      .then(d => {
-        if (d.conversations) setConversations(d.conversations)
-        if (d.role) setRole(d.role)
-      })
-      .finally(() => setLoading(false))
+  fetch('/api/conversations')
+  .then(r => {
+    if (r.status === 401) return null  // not logged in — show empty state
+    return r.json()
+  })
+  .then(d => {
+    if (!d) return
+    if (d.conversations) setConversations(d.conversations)
+    if (d.role) setRole(d.role)
+  })
+  .catch(console.error)
+  .finally(() => setLoading(false))
   }, [])
 
   if (loading) return <SpinnerBlock label="Loading conversations…" />
