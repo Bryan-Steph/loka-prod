@@ -80,9 +80,10 @@ export async function PATCH(
 
   await admin.from('bargain_offers').update({ status: 'countered' }).eq('id', offerId)
 
+// In the action === 'counter' branch — get product_id from conversation
   const { data: conversation } = await admin
     .from('conversations')
-    .select('buyer_id, vendor_id')
+    .select('buyer_id, vendor_id, product_id')
     .eq('id', id)
     .single()
 
@@ -92,6 +93,7 @@ export async function PATCH(
       conversation_id: id,
       buyer_id:        conversation!.buyer_id,
       vendor_id:       conversation!.vendor_id,
+      product_id:      conversation!.product_id,   // ← ADD THIS
       offered_price:   price,
       offered_by:      user.id,
       status:          'pending',

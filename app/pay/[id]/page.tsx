@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { useParams, useSearchParams } from 'next/navigation'
+import { useParams, useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
   ArrowLeft, ShieldCheck, Phone, Smartphone,
@@ -16,6 +16,7 @@ const FEE_RATE = 0.02
 export default function PayPage() {
   const params       = useParams()
   const searchParams = useSearchParams()
+  const router       = useRouter()
   const productId    = params?.id as string
 
   // Product data
@@ -61,6 +62,14 @@ export default function PayPage() {
       .then(d => { if (d.product) setProduct(d.product) })
       .finally(() => setLoadingProduct(false))
   }, [productId])
+
+  // Add this useEffect for guest redirect:
+useEffect(() => {
+  if (!productId) return
+  fetch('/api/auth/me').then(r => {
+    if (r.status === 401) router.push(`/login?next=/pay/${productId}`)
+  }).catch(() => {})
+}, [productId, router])
 
   // Derived pricing
   const vendor      = product?.vendors as Record<string, unknown> | null
@@ -126,13 +135,13 @@ export default function PayPage() {
 
   // ── Step 1: Initiate payment ──────────────────────────────────────────────
 
-  async function handlePay() {
-    if (!phone.trim()) { setError('Enter your MTN MoMo phone number'); return }
-    setLoading(true)
-    setError('')
+async function handlePay() {
+  if (!phone.trim()) { setError('Enter your MTN MoMo phone number'); return }
+  setLoading(true)
+  setError('')
 
-    try {
-      const res = await fetch('/api/transactions', {
+  try {
+    const res = await fetch('/api/transactions', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -144,6 +153,11 @@ export default function PayPage() {
       })
 
       const d = await res.json()
+
+      if (res.status === 401) {
+        router.push(`/login?next=/pay/${productId}`)
+        return
+      }
 
       if (!res.ok) {
         // Already has an active transaction — resume polling
@@ -378,6 +392,17 @@ export default function PayPage() {
                     Listening for confirmation…
                   </p>
                 </div>
+                {process.env.NEXT_PUBLIC_PAYMENT_SIMULATION_MODE === 'true' && transactionId && (
+  <button
+    onClick={async () => {
+      await fetch(`/api/transactions/${transactionId}/simulate-webhook`, { method: 'POST' })
+    }}
+    className="flex h-11 items-center justify-center gap-1.5 rounded-xl border border-success px-4 font-mono text-[12px] text-success"
+  >
+    <CheckCircle2 size={14} />
+    Simulate MoMo Approval (Demo)
+  </button>
+)}
                 {paymentLink && (
                   <a
                     href={paymentLink}

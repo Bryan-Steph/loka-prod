@@ -7,67 +7,38 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params
-  if (!id) return NextResponse.json({ error: 'Missing vendor ID' }, { status: 400 })
+  const admin  = createAdminSupabaseClient()
 
-  const admin = createAdminSupabaseClient()
+  const [vendorRes, productsRes, followerRes] = await Promise.all([
+    admin.from('vendors').select('id, shop_name, shop_description, shop_avatar_url, address_text, latitude, longitude, verification_status, operating_hours').eq('id', id).single(),
+    admin.from('products').select('*, vendors(id, shop_name, shop_avatar_url, verification_status, address_text), categories(id, name_en)').eq('vendor_id', id).eq('is_published', true).is('deleted_at', null).order('created_at', { ascending: false }),
+    admin.from('vendor_follows').select('id', { count: 'exact', head: true }).eq('vendor_id', id),
+  ])
 
-  // Public vendor profile — phone number intentionally excluded
-  const { data: vendor, error } = await admin
-    .from('vendors')
-    .select(
-      'id, shop_name, shop_description, shop_avatar_url, ' +
-      'address_text, latitude, longitude, verification_status, operating_hours',
-    )
-    .eq('id', id)
-    .maybeSingle()
-
-  if (error) {
-    console.error('[GET /api/vendors/[id]]', error.message)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+  if (vendorRes.error || !vendorRes.data) {
+    return NextResponse.json({ error: 'Vendor not found' }, { status: 404 })
   }
-  if (!vendor) return NextResponse.json({ error: 'Vendor not found' }, { status: 404 })
 
-  // Published products only
-  const { data: products } = await admin
-    .from('products')
-    .select(
-      'id, name_en, price, condition, photo_urls, bargaining_allowed, ' +
-      'stock_status, view_count, vendor_id, categories ( name_en )',
-    )
-    .eq('vendor_id', (vendor as any).id)
-    .eq('is_published', true)
-    .is('deleted_at', null)
-    .order('created_at', { ascending: false })
-    .limit(24)
-
-  // Follower count
-  const { count: followerCount } = await admin
-    .from('vendor_follows')
-    .select('id', { count: 'exact', head: true })
-    .eq('vendor_id', (vendor as any).id)
-
-  // Is the current user following? Best-effort — guests see false, no crash
+  // Check if current user is following
   let is_following = false
   try {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
-      const { data: row } = await admin
+      const { data: follow } = await admin
         .from('vendor_follows')
         .select('id')
-        .eq('vendor_id', (vendor as any).id)
-        .eq('user_id', user.id)
+        .eq('vendor_id', id)
+        .eq('buyer_id', user.id)
         .maybeSingle()
-      is_following = !!row
+      is_following = !!follow
     }
-  } catch {
-    // unauthenticated visitors — page still renders correctly
-  }
+  } catch { /* unauthenticated — fine */ }
 
   return NextResponse.json({
-    vendor,
-    products: products ?? [],
-    follower_count: followerCount ?? 0,
+    vendor:         vendorRes.data,
+    products:       productsRes.data ?? [],
+    follower_count: followerRes.count ?? 0,
     is_following,
   })
 }

@@ -1,227 +1,247 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import {
-  MessageSquare,
-  Package,
-  TrendingDown,
-  Clock,
-  CheckCircle2,
-  Bell,
+  Bell, CheckCircle2, DollarSign, AlertTriangle,
+  ShieldCheck, XCircle, MessageSquare, Package,
+  Clock, Loader2, Check,
 } from 'lucide-react'
+import { BottomNav } from '@/components/ui/bottom-nav'
 import { cn } from '@/lib/utils'
-import { BottomNav } from '@/components/buyer/BottomNav'
-import {
-  NotificationItem,
-  type NotifTone,
-} from '@/components/ui/NotificationItem'
-import type { LucideIcon } from 'lucide-react'
 
-const TABS = ['All', 'Bargains', 'Products', 'Payments'] as const
-type TabId = (typeof TABS)[number]
-
-type Notif = {
-  icon: LucideIcon
-  tone: NotifTone
+interface Notification {
+  id: string
+  type: string
   title: string
-  description: string
-  time: string
-  unread?: boolean
-  actionTag?: string
-  group: 'TODAY' | 'YESTERDAY' | 'THIS WEEK'
-  type: 'Bargains' | 'Products' | 'Payments'
+  body: string
+  is_read: boolean
+  data: Record<string, unknown> | null
+  created_at: string
 }
 
-const NOTIFS: Notif[] = [
-  {
-    icon: MessageSquare,
-    tone: 'amber',
-    title: 'Bargain Accepted — 40,500 XAF',
-    description:
-      'Mama Agnes accepted your offer for Samsung Galaxy A32. Tap to pay.',
-    time: '5m ago',
-    unread: true,
-    actionTag: 'Pay Now',
-    group: 'TODAY',
-    type: 'Bargains',
-  },
-  {
-    icon: Package,
-    tone: 'blue',
-    title: 'New from Tech Corner',
-    description:
-      'Tech Corner just added: Wireless Earbuds (20,000 XAF). You follow this vendor.',
-    time: '2h ago',
-    unread: true,
-    group: 'TODAY',
-    type: 'Products',
-  },
-  {
-    icon: TrendingDown,
-    tone: 'amber',
-    title: 'Price Drop Alert',
-    description:
-      "Samsung Galaxy A32 dropped from 48,000 to 45,000 XAF. It's in your wishlist.",
-    time: '4h ago',
-    group: 'TODAY',
-    type: 'Products',
-  },
-  {
-    icon: Clock,
-    tone: 'amber',
-    title: 'Pickup Code Expiring Soon',
-    description:
-      'Your pickup code for JBL-style Speaker expires in 6 hours. Visit Shed 7, Up Station.',
-    time: '1d ago',
-    unread: true,
-    group: 'YESTERDAY',
-    type: 'Payments',
-  },
-  {
-    icon: CheckCircle2,
-    tone: 'success',
-    title: 'Payment Confirmed',
-    description:
-      'Your payment of 12,000 XAF for JBL-style Speaker was received. Pickup code: ••••••',
-    time: '1d ago',
-    group: 'YESTERDAY',
-    type: 'Payments',
-  },
-  {
-    icon: MessageSquare,
-    tone: 'amber',
-    title: 'Counter Offer from Power Up Store',
-    description:
-      'Power Up Store countered your offer: 7,500 XAF for Power Bank 20,000mAh.',
-    time: '1d ago',
-    group: 'YESTERDAY',
-    type: 'Bargains',
-  },
-  {
-    icon: Package,
-    tone: 'blue',
-    title: 'New from Fabrics Palace',
-    description: 'Fabrics Palace added 3 new products in Fashion.',
-    time: '1d ago',
-    group: 'YESTERDAY',
-    type: 'Products',
-  },
-  {
-    icon: CheckCircle2,
-    tone: 'success',
-    title: 'Pickup Confirmed',
-    description:
-      'Your pickup of JBL-style Speaker from Tech Corner (Shed 7) was confirmed. Transaction complete.',
-    time: '3d ago',
-    group: 'THIS WEEK',
-    type: 'Payments',
-  },
-  {
-    icon: TrendingDown,
-    tone: 'amber',
-    title: 'Price Drop Alert',
-    description: "iPhone 13 Case dropped to 1,800 XAF. It's in your wishlist.",
-    time: '4d ago',
-    group: 'THIS WEEK',
-    type: 'Products',
-  },
-  {
-    icon: Package,
-    tone: 'blue',
-    title: 'New from Mama Agnes Electronics',
-    description: 'Mama Agnes added: Tecno Camon 30 Pro. Be the first to bargain.',
-    time: '5d ago',
-    group: 'THIS WEEK',
-    type: 'Products',
-  },
+type FilterTab = 'all' | 'bargains' | 'payments' | 'vendors'
+
+const TABS: { label: string; value: FilterTab }[] = [
+  { label: 'All',      value: 'all' },
+  { label: 'Bargains', value: 'bargains' },
+  { label: 'Payments', value: 'payments' },
+  { label: 'Vendors',  value: 'vendors' },
 ]
 
-const GROUPS: Notif['group'][] = ['TODAY', 'YESTERDAY', 'THIS WEEK']
+function typeToFilter(type: string): FilterTab {
+  if (/offer|bargain|counter|accepted/i.test(type)) return 'bargains'
+  if (/payment|pickup|transaction|escrow|release|disburse/i.test(type)) return 'payments'
+  if (/vendor|shop|verif|suspend|approved|rejected/i.test(type)) return 'vendors'
+  return 'all'
+}
 
-function NotifSkeleton() {
-  return (
-    <div className="flex gap-3 px-4 py-3.5">
-      <div className="h-10 w-10 shrink-0 animate-pulse rounded-xl bg-surface-2" />
-      <div className="flex-1 space-y-2">
-        <div className="h-3 w-3/5 animate-pulse rounded bg-surface-2" />
-        <div className="h-2.5 w-4/5 animate-pulse rounded bg-surface-2" />
-      </div>
-    </div>
-  )
+function NotifIcon({ type }: { type: string }) {
+  const base = 'flex h-9 w-9 shrink-0 items-center justify-center rounded-full'
+  if (/approved/i.test(type))   return <div className={cn(base, 'bg-success/15')}><ShieldCheck size={18} className="text-success" /></div>
+  if (/rejected|suspended/i.test(type)) return <div className={cn(base, 'bg-error/15')}><XCircle size={18} className="text-error" /></div>
+  if (/dispute/i.test(type))    return <div className={cn(base, 'bg-error/15')}><AlertTriangle size={18} className="text-error" /></div>
+  if (/payment|release|disburse/i.test(type)) return <div className={cn(base, 'bg-success/15')}><DollarSign size={18} className="text-success" /></div>
+  if (/pickup/i.test(type))     return <div className={cn(base, 'bg-primary/15')}><CheckCircle2 size={18} className="text-primary" /></div>
+  if (/offer|bargain|counter|accepted/i.test(type)) return <div className={cn(base, 'bg-primary/15')}><MessageSquare size={18} className="text-primary" /></div>
+  if (/product|stock/i.test(type)) return <div className={cn(base, 'bg-surface-3')}><Package size={18} className="text-muted-foreground" /></div>
+  if (/expir/i.test(type))      return <div className={cn(base, 'bg-primary/15')}><Clock size={18} className="text-primary" /></div>
+  return <div className={cn(base, 'bg-surface-2')}><Bell size={18} className="text-muted-foreground" /></div>
+}
+
+function timeAgo(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime()
+  const mins = Math.floor(diff / 60000)
+  if (mins < 1)  return 'just now'
+  if (mins < 60) return `${mins}m ago`
+  const hrs = Math.floor(mins / 60)
+  if (hrs < 24)  return `${hrs}h ago`
+  const days = Math.floor(hrs / 24)
+  if (days < 7)  return `${days}d ago`
+  return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+}
+
+function dayLabel(iso: string): string {
+  const d = new Date(iso)
+  const today = new Date()
+  const yesterday = new Date(today)
+  yesterday.setDate(yesterday.getDate() - 1)
+  if (d.toDateString() === today.toDateString()) return 'TODAY'
+  if (d.toDateString() === yesterday.toDateString()) return 'YESTERDAY'
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })
+}
+
+function getActionBadge(notif: Notification): { label: string; href: string } | null {
+  const d = notif.data ?? {}
+  if (/payment_confirmed|pickup_confirmed/.test(notif.type) && d.transaction_id) {
+    return { label: 'VIEW', href: `/transactions/${d.transaction_id}` }
+  }
+  if (/accepted/.test(notif.type) && d.conversation_id) {
+    return { label: 'PAY NOW', href: `/chat/${d.conversation_id}` }
+  }
+  if (/offer|bargain|counter/.test(notif.type) && d.conversation_id) {
+    return { label: 'VIEW', href: `/chat/${d.conversation_id}` }
+  }
+  return null
 }
 
 export default function NotificationsPage() {
-  const [tab, setTab] = useState<TabId>('All')
+  const router = useRouter()
+  const [notifications, setNotifications] = useState<Notification[]>([])
+  const [unread, setUnread]   = useState(0)
   const [loading, setLoading] = useState(true)
+  const [tab, setTab]         = useState<FilterTab>('all')
+  const [markingAll, setMarkingAll] = useState(false)
 
-  useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 900)
-    return () => clearTimeout(t)
-  }, [])
+  const load = useCallback(() => {
+    setLoading(true)
+    fetch('/api/notifications')
+      .then(r => {
+        if (r.status === 401) { router.push('/login'); return null }
+        return r.json()
+      })
+      .then(d => {
+        if (!d) return
+        setNotifications(d.notifications ?? [])
+        setUnread(d.unread ?? 0)
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false))
+  }, [router])
 
-  const filtered = NOTIFS.filter((n) => tab === 'All' || n.type === tab)
-  const isEmpty = !loading && filtered.length === 0
+  useEffect(() => { load() }, [load])
+
+  const markAllRead = async () => {
+    setMarkingAll(true)
+    await fetch('/api/notifications', { method: 'PATCH' }).catch(() => {})
+    setNotifications(prev => prev.map(n => ({ ...n, is_read: true })))
+    setUnread(0)
+    setMarkingAll(false)
+  }
+
+  const displayed = tab === 'all'
+    ? notifications
+    : notifications.filter(n => typeToFilter(n.type) === tab)
+
+  // Group by day
+  const grouped: Record<string, Notification[]> = {}
+  for (const n of displayed) {
+    const key = dayLabel(n.created_at)
+    if (!grouped[key]) grouped[key] = []
+    grouped[key].push(n)
+  }
 
   return (
-    <div className="mx-auto min-h-dvh max-w-[480px] bg-background pb-20">
-      <header className="sticky top-0 z-30 border-b border-surface-3 bg-surface-1">
-        <div className="flex items-center justify-between px-4 py-3.5">
-          <h1 className="font-heading text-xl text-foreground">Notifications</h1>
-          <button className="text-xs text-primary">Mark all read</button>
-        </div>
-        <div className="no-scrollbar flex gap-2 overflow-x-auto px-4 pb-3">
-          {TABS.map((t) => {
-            const active = t === tab
+    <div className="min-h-screen pb-20">
+      <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-surface-3 bg-background/95 px-4 backdrop-blur">
+        <h1 className="font-syne text-[18px] font-bold text-foreground">
+          Notifications {unread > 0 && <span className="ml-1.5 rounded-full bg-primary px-1.5 py-0.5 font-mono text-[11px] text-primary-foreground">{unread}</span>}
+        </h1>
+        {unread > 0 && (
+          <button
+            onClick={markAllRead}
+            disabled={markingAll}
+            className="flex items-center gap-1.5 text-[12px] text-primary disabled:opacity-60"
+          >
+            {markingAll ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />}
+            Mark all read
+          </button>
+        )}
+      </header>
+
+      <div className="mx-auto w-full max-w-[640px]">
+        {/* Category tabs */}
+        <div className="no-scrollbar flex gap-2 overflow-x-auto border-b border-surface-3 px-4 pt-3 pb-0">
+          {TABS.map(t => {
+            const count = t.value === 'all' ? unread : notifications.filter(n => !n.is_read && typeToFilter(n.type) === t.value).length
             return (
               <button
-                key={t}
-                onClick={() => setTab(t)}
+                key={t.value}
+                onClick={() => setTab(t.value)}
                 className={cn(
-                  'shrink-0 rounded-full px-3 py-1.5 font-mono text-[10px] transition-colors',
-                  active
-                    ? 'border border-primary bg-primary/15 text-primary'
-                    : 'bg-surface-2 text-muted-foreground',
+                  'shrink-0 border-b-2 px-3 pb-2.5 text-[13px] font-medium transition-colors',
+                  tab === t.value
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-muted-foreground',
                 )}
               >
-                {t}
+                {t.label}
+                {count > 0 && (
+                  <span className="ml-1.5 rounded-full bg-primary/15 px-1 py-0.5 font-mono text-[10px] text-primary">
+                    {count}
+                  </span>
+                )}
               </button>
             )
           })}
         </div>
-      </header>
 
-      {loading ? (
-        <div>
-          {Array.from({ length: 6 }).map((_, i) => (
-            <NotifSkeleton key={i} />
-          ))}
-        </div>
-      ) : isEmpty ? (
-        <div className="flex flex-col items-center px-6 py-24 text-center">
-          <Bell size={56} className="text-muted-foreground" />
-          <p className="mt-4 font-heading text-base text-muted-foreground">
-            No payment notifications yet
-          </p>
-          <p className="mt-1 max-w-[260px] text-[13px] text-muted-foreground">
-            Your payment confirmations and receipts will appear here
-          </p>
-        </div>
-      ) : (
-        GROUPS.map((g) => {
-          const groupItems = filtered.filter((n) => n.group === g)
-          if (groupItems.length === 0) return null
-          return (
-            <div key={g}>
-              <p className="sticky top-[97px] z-20 bg-surface-1 px-4 py-2 font-mono text-[10px] uppercase tracking-wider text-primary">
-                {g}
-              </p>
-              {groupItems.map((n, i) => (
-                <NotificationItem key={n.title + i} {...n} index={i} />
-              ))}
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <Loader2 size={28} className="animate-spin text-primary" />
+          </div>
+        ) : displayed.length === 0 ? (
+          <div className="flex flex-col items-center gap-3 py-20 text-center">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-surface-2">
+              <Bell size={28} className="text-muted-foreground" />
             </div>
-          )
-        })
-      )}
+            <p className="font-syne text-[16px] font-bold text-foreground">No notifications</p>
+            <p className="text-[13px] text-muted-foreground">
+              Activity from your bargains and purchases will appear here.
+            </p>
+          </div>
+        ) : (
+          <div>
+            {Object.entries(grouped).map(([day, items]) => (
+              <div key={day}>
+                <div className="px-4 py-3">
+                  <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    {day}
+                  </p>
+                </div>
+                <div className="divide-y divide-surface-3">
+                  {items.map(notif => {
+                    const action = getActionBadge(notif)
+                    return (
+                      <div
+                        key={notif.id}
+                        className={cn(
+                          'flex items-start gap-3 px-4 py-3.5 transition-colors',
+                          !notif.is_read ? 'bg-primary/5' : 'bg-background',
+                        )}
+                      >
+                        <NotifIcon type={notif.type} />
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-start justify-between gap-2">
+                            <p className={cn('text-[13px] font-semibold leading-tight', !notif.is_read ? 'text-foreground' : 'text-muted-foreground')}>
+                              {notif.title}
+                            </p>
+                            {action && (
+                              <button
+                                onClick={() => router.push(action.href)}
+                                className="shrink-0 rounded-full bg-primary px-2 py-0.5 font-mono text-[10px] font-bold text-primary-foreground"
+                              >
+                                {action.label}
+                              </button>
+                            )}
+                          </div>
+                          <p className="mt-0.5 text-[12px] text-muted-foreground">{notif.body}</p>
+                          <p className="mt-1 font-mono text-[10px] text-muted-foreground">
+                            {timeAgo(notif.created_at)}
+                          </p>
+                        </div>
+                        {!notif.is_read && (
+                          <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary" />
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       <BottomNav active="notifications" />
     </div>

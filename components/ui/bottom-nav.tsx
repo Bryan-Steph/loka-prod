@@ -9,7 +9,7 @@ import { ROUTES } from '@/lib/routes'
 type Tab = 'home' | 'search' | 'chat' | 'notifications' | 'profile'
 
 export function BottomNav({ active }: { active: Tab }) {
-  const user = useAuthStore((s) => s.user)
+  const user     = useAuthStore((s) => s.user)
   const isVendor = user?.role === 'vendor'
 
   const TABS: { id: Tab; label: string; icon: typeof Home; href: string }[] = [
@@ -23,7 +23,7 @@ export function BottomNav({ active }: { active: Tab }) {
       id:    'search',
       label: 'Search',
       icon:  Search,
-      href:  ROUTES.search,           // was /feed — fixed
+      href:  ROUTES.search,
     },
     {
       id:    'chat',
@@ -51,7 +51,7 @@ export function BottomNav({ active }: { active: Tab }) {
       aria-label="Primary navigation"
     >
       {TABS.map((tab) => {
-        const Icon = tab.icon
+        const Icon     = tab.icon
         const isActive = tab.id === active
         return (
           <Link
@@ -63,7 +63,14 @@ export function BottomNav({ active }: { active: Tab }) {
               isActive ? 'text-primary' : 'text-muted-foreground',
             )}
           >
-            <Icon size={22} strokeWidth={isActive ? 2.4 : 2} />
+            {/* Icon + active dot container */}
+            <div className="relative flex h-7 w-7 items-center justify-center">
+              {/* Dot sits centred 6 px above the icon */}
+              {isActive && (
+                <span className="absolute -top-1.5 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-primary" />
+              )}
+              <Icon size={22} strokeWidth={isActive ? 2.4 : 2} />
+            </div>
             <span className="font-mono text-[9px]">{tab.label}</span>
           </Link>
         )
